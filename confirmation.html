@@ -2,22 +2,24 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
   <title>Merci · Nom de la boutique</title>
   <link rel="icon" href="data:,">
   <link rel="preload" href="fonts/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="flex min-h-dvh flex-col bg-white" x-data="confirmation">
-  <header class="relative flex h-16 items-center justify-center px-14 lg:h-20">
+<body class="flex min-h-dvh flex-col" x-data="confirmation">
+  <header class="site bords-surs">
+    <div class="relative flex h-16 items-center justify-center px-14 lg:h-20">
     <a href="index.html" class="absolute top-1/2 left-1 grid size-11 -translate-y-1/2 place-items-center md:left-3" aria-label="Retour à l’étal">
       <svg class="trait size-5" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
     </a>
     <a href="index.html" class="marque" :class="$store.vue.nom === 'pastel' && 'marque--serif'" x-text="$store.boutique.nom">Nom de la boutique</a>
+  </div>
   </header>
 
-  <main class="flex-1 px-4 pt-4 pb-16">
+  <main class="site bords-surs flex-1 pt-4 pb-16 [--marge:1rem]">
     <div class="mx-auto max-w-[560px]">
       <div class="flex flex-col items-center text-center">
         <span class="grid size-14 place-items-center rounded-full bg-encre text-white">

@@ -3,7 +3,7 @@
    serveur : le panier et la commande restent dans le navigateur. */
 
 (() => {
-  const { boutique, rayons, pieces, livraisons, paiements } = window.ETAL;
+  const { boutique, rayons, suggestions, pieces, livraisons, paiements } = window.ETAL;
 
   // Le navigateur peut refuser le stockage (navigation privée, réglages) :
   // la démo marche alors, sans mémoire d’une page à l’autre.
@@ -46,6 +46,25 @@
   const prixEtiquette = (p) => (p.lot ? `${p.lot.quantite} pour ${fcfa(p.lot.prix)}` : fcfa(p.prix));
   // Les chaussures se mesurent en pointure, le reste en taille.
   const mesure = (p, t) => (t === 'TU' ? 'Taille unique' : `${p.rayon === 'chaussures' ? 'Pointure' : 'Taille'} ${t}`);
+  // Les tailles encore en stock, tous coloris confondus.
+  const taillesDe = (p) => (p.variantes?.flatMap((v) => v.tailles) ?? p.tailles).filter((t) => t.stock).map((t) => t.t);
+  const ORDRE_TAILLES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+  const rangTaille = (t) => {
+    const i = ORDRE_TAILLES.indexOf(t);
+    if (i >= 0) return i;
+    return t === 'TU' ? 999 : 100 + Number(t);
+  };
+  const TRANCHES = [
+    { code: 'moins-5000', nom: 'Moins de 5 000', garde: (prix) => prix < 5000 },
+    { code: '5000-10000', nom: '5 000 à 10 000', garde: (prix) => prix >= 5000 && prix <= 10000 },
+    { code: 'plus-10000', nom: 'Plus de 10 000', garde: (prix) => prix > 10000 },
+  ];
+  const TRIS = {
+    pertinence: { nom: 'Pertinence', ranger: () => 0 },
+    nouveautes: { nom: 'Nouveautés', ranger: (a, b) => b.arrive.localeCompare(a.arrive) },
+    'prix-croissant': { nom: 'Prix croissant', ranger: (a, b) => a.prix - b.prix },
+    'prix-decroissant': { nom: 'Prix décroissant', ranger: (a, b) => b.prix - a.prix },
+  };
 
   // Chaque mot cherché doit se trouver dans le nom, le rayon, la matière, les
   // coloris ou les mots-clés, sans tenir compte des accents ni du pluriel.
@@ -140,6 +159,8 @@
     menu: svg('<path d="M4 7h16M4 12h16M4 17h10"/>'),
     croix: svg('<path d="m6 6 12 12M18 6 6 18"/>'),
     fleche: svg('<path d="M7 17 17 7M9 7h8v8"/>'),
+    moins: svg('<path d="M6 12h12"/>'),
+    plus: svg('<path d="M12 6v12M6 12h12"/>'),
   };
 
   // Un panneau : un dialogue sombre, posé juste au-dessus de la pastille.
@@ -164,44 +185,45 @@
   const panneaux = [
     panneau(
       'recherche',
-      '<label id="titre-recherche" for="champ-recherche" class="panneau-titre">Tu cherches quoi&nbsp;?</label>',
-      `<form action="index.html" method="get" role="search" class="mt-4" x-data="recherche">
-        <input id="champ-recherche" name="q" type="search" class="champ-sombre" placeholder="Wax, jean, baskets…"
-          autocomplete="off" enterkeyhint="search" x-model="q" data-focus>
-        <p class="mt-3 min-h-5 text-sm" aria-live="polite" x-text="q.trim() ? resultat : ''"></p>
-      </form>`,
+      '<h2 id="titre-recherche" class="panneau-titre">Recherche</h2>',
+      `<form action="index.html" method="get" role="search" class="mt-5">
+        <input name="q" type="search" class="champ-sombre" placeholder="Tu cherches quoi&nbsp;?" aria-label="Tu cherches quoi&nbsp;?"
+          autocomplete="off" enterkeyhint="search" data-focus>
+      </form>
+      <p class="intitule-panneau mt-6">Suggestions</p>
+      <nav aria-label="Suggestions">
+        ${suggestions.map((s) => `<a class="panneau-lien" href="${s.lien}"><span>${s.libelle}</span>${icone.fleche}</a>`).join('')}
+      </nav>`,
     ),
     panneau(
       'panier',
-      '<h2 id="titre-panier" class="panneau-titre">Ton panier</h2>',
-      `<p class="mt-4" x-show="!$store.panier.nombre">Ton panier est vide. Fais un tour de l’étal&nbsp;: les belles pièces partent vite.</p>
+      '<h2 id="titre-panier" class="panneau-titre">Panier</h2>',
+      `<p class="mt-5 border-t border-sombre-survol pt-5" x-show="!$store.panier.nombre">Ton panier est vide. Fais un tour de l’étal&nbsp;: les belles pièces partent vite.</p>
       <div x-show="$store.panier.nombre">
-        <ul class="mt-2">
+        <ul class="mt-5 border-b border-sombre-survol">
           <template x-for="a in $store.panier.articles" :key="a.cle">
-            <li class="flex items-center gap-3 border-b border-sombre-survol py-3">
-              <span class="grid size-14 shrink-0 place-items-center rounded-xl bg-sol p-1.5"><img :src="a.image" alt="" class="size-full object-contain"></span>
+            <li class="flex items-center gap-3 border-t border-sombre-survol py-3.5">
+              <span class="grid size-13 shrink-0 place-items-center bg-white p-1"><img :src="a.image" alt="" class="size-full object-contain"></span>
               <span class="min-w-0 flex-1">
                 <span class="block font-semibold text-encre-claire" x-text="a.nom"></span>
-                <span class="block text-[13px]" x-text="a.detail + (a.qte > 1 ? ' · ×' + a.qte : '')"></span>
+                <span class="block text-[13px]" x-text="$fcfa(a.prix) + ' · ' + a.detail"></span>
               </span>
-              <span class="text-sm font-semibold whitespace-nowrap text-encre-claire" x-text="$fcfa(a.prix * a.qte)"></span>
-              <button type="button" class="-mr-3 grid size-11 shrink-0 place-items-center rounded-full hover:bg-sombre-survol"
-                :aria-label="'Retirer ' + a.nom + ' du panier'" @click="$store.panier.retirer(a.cle)">${svg('<path d="m7 7 10 10M17 7 7 17"/>', 'size-4')}</button>
+              <span class="quantite" role="group" :aria-label="'Quantité, ' + a.nom">
+                <button type="button" :aria-label="a.qte > 1 ? 'Un de moins' : 'Retirer du panier'" @click="$store.panier.changer(a.cle, -1)">${icone.moins}</button>
+                <span class="w-5 text-center font-semibold text-encre-claire" aria-live="polite" x-text="a.qte"></span>
+                <button type="button" aria-label="Un de plus" :disabled="!$store.panier.encore(a.cle)" @click="$store.panier.changer(a.cle, 1)">${icone.plus}</button>
+              </span>
             </li>
           </template>
         </ul>
-        <dl class="mt-3 grid grid-cols-[1fr_auto] items-baseline gap-y-1 text-sm">
-          <template x-if="$store.panier.remise">
-            <div class="contents"><dt>Offre de lot</dt><dd class="text-right" x-text="'−' + $fcfa($store.panier.remise)"></dd></div>
-          </template>
-          <dt class="font-semibold text-encre-claire">Total</dt>
-          <dd class="font-main text-xl text-encre-claire" x-text="$fcfa($store.panier.total)"></dd>
-        </dl>
-        <p class="mt-1 text-xs">Tu choisis la livraison à l’étape suivante.</p>
-        <div class="mt-4 grid gap-3">
-          <a href="paiement.html" class="bouton-principal">Commander</a>
-          <button type="button" class="bouton-secondaire" @click="$store.ui.fermer()">Continuer à fouiller</button>
-        </div>
+        <p class="mt-4 flex items-center justify-between text-sm" x-show="$store.panier.remise">
+          <span>Offre de lot</span><span x-text="'−' + $fcfa($store.panier.remise)"></span>
+        </p>
+        <p class="mt-4 flex items-center justify-between">
+          <span class="text-[13px] font-semibold tracking-[0.08em] uppercase">Total</span>
+          <span class="font-main text-[28px] leading-none text-encre-claire" x-text="$fcfa($store.panier.total)"></span>
+        </p>
+        <a href="paiement.html" class="bouton-principal mt-5">Passer au paiement</a>
       </div>`,
     ),
     panneau(
@@ -242,7 +264,33 @@
         </div>
       </div>`,
     ),
-  ].join('');
+  ];
+
+  // Les filtres d’un rayon : seulement sur l’étal, dont ils filtrent les pièces.
+  if (document.body.dataset.page === 'etal') {
+    panneaux.push(
+      panneau(
+        'filtres',
+        '<h2 id="titre-filtres" class="panneau-titre">Filtres</h2>',
+        `<p class="intitule-panneau mt-5">Taille</p>
+        <div role="group" aria-label="Taille" class="flex flex-wrap gap-2">
+          <template x-for="t in taillesDispo" :key="t">
+            <button type="button" class="puce" :aria-pressed="String($store.filtres.taille === t)" @click="$store.filtres.basculer('taille', t)" x-text="t"></button>
+          </template>
+        </div>
+        <p class="intitule-panneau mt-5">Prix, en FCFA</p>
+        <div role="group" aria-label="Prix" class="flex flex-wrap gap-2">
+          <template x-for="t in tranches" :key="t.code">
+            <button type="button" class="puce" :aria-pressed="String($store.filtres.prix === t.code)" @click="$store.filtres.basculer('prix', t.code)" x-text="t.nom"></button>
+          </template>
+        </div>
+        <div class="mt-6 grid gap-3">
+          <button type="button" class="bouton-principal" @click="$store.ui.fermer()" x-text="pieces.length ? 'Voir ' + pieces.length + (pieces.length > 1 ? ' pièces' : ' pièce') : 'Aucune pièce'"></button>
+          <button type="button" class="bouton-secondaire" x-show="$store.filtres.nombre" @click="$store.filtres.effacer()">Tout effacer</button>
+        </div>`,
+      ),
+    );
+  }
 
   const boutonPastille = (nom, etiquette, contenu) => `
     <button type="button" class="pastille-bouton" aria-haspopup="dialog" ${etiquette}
@@ -251,7 +299,7 @@
   // La pastille : la seule navigation du site, avec ses quatre boutons.
   const pastille = `
     <div class="voile" x-show="$store.ui.panneau" x-cloak x-transition.opacity.duration.200ms @click="$store.ui.fermer()"></div>
-    ${panneaux}
+    ${panneaux.join('')}
     <nav class="pastille sur-sombre" :class="$store.ui.panneau && 'est-pleine'" aria-label="Navigation">
       ${boutonPastille('recherche', 'aria-label="Rechercher"', icone.loupe)}
       ${boutonPastille(
@@ -334,6 +382,19 @@
         this.lignes = this.lignes.filter((l) => cleDe(l) !== cle);
         this.sauver();
       },
+      // Il reste du stock pour en prendre un de plus.
+      encore(cle) {
+        const l = this.lignes.find((x) => cleDe(x) === cle);
+        return Boolean(l) && l.qte < stockDe(l.slug, l.couleur, l.taille);
+      },
+      // Le « − » à 1 retire la pièce du panier.
+      changer(cle, pas) {
+        const l = this.lignes.find((x) => cleDe(x) === cle);
+        if (!l || (pas > 0 && !this.encore(cle))) return;
+        l.qte += pas;
+        if (l.qte < 1) this.retirer(cle);
+        else this.sauver();
+      },
       vider() {
         this.lignes = [];
         this.sauver();
@@ -379,13 +440,21 @@
       if (e.key === 'etal:panier') Alpine.store('panier').lignes = lire('etal:panier', []);
     });
 
-    Alpine.data('recherche', () => ({
-      q: new URLSearchParams(location.search).get('q') ?? '',
-      get resultat() {
-        const n = pieces.filter((p) => correspond(p, this.q)).length;
-        return n ? `${pluriel(n)} sur l’étal` : 'Rien sur l’étal pour ça.';
+    // Les filtres d’un rayon : une taille, une tranche de prix.
+    Alpine.store('filtres', {
+      taille: '',
+      prix: '',
+      get nombre() {
+        return (this.taille ? 1 : 0) + (this.prix ? 1 : 0);
       },
-    }));
+      basculer(nom, valeur) {
+        this[nom] = this[nom] === valeur ? '' : valeur;
+      },
+      effacer() {
+        this.taille = '';
+        this.prix = '';
+      },
+    });
 
     Alpine.data('catalogue', () => ({
       public: new URLSearchParams(location.search).get('public') ?? '',
@@ -402,28 +471,54 @@
           return requete ? `index.html?${requete}` : 'index.html';
         };
         return [
-          { nom: 'Tout voir', href: vers({}) },
+          { nom: 'Tout voir', href: vers({ rayon: 'tout' }) },
           { nom: 'Nouveautés', href: vers({ nouveautes: '1' }) },
           ...rayons.map((r) => ({ nom: r.nom, href: vers({ rayon: r.slug }) })),
         ];
       },
     }));
 
-    // L’accueil : la mosaïque, filtrée par la recherche ou le catalogue.
+    /* L’étal, en trois modes :
+       - accueil : toute la mosaïque, sans en-tête ;
+       - recherche (?q=wax) : le champ, les rayons trouvés et le tri ;
+       - rayon (?rayon=hauts, ?rayon=tout, ?nouveautes=1) : le titre, Pour qui,
+         les onglets des rayons, les filtres et le tri. */
     Alpine.data('etal', () => ({
+      mode: 'accueil',
       q: '',
       rayon: '',
-      public: '',
       nouveautes: false,
+      public: '',
+      // Recherche : le rayon choisi parmi les résultats.
+      parmi: '',
+      tri: 'pertinence',
       cols: 2,
       ouverte: null,
       retour: null,
+      tranches: TRANCHES,
+      publics: [
+        { code: '', nom: 'Tout' },
+        { code: 'femme', nom: 'Femme' },
+        { code: 'homme', nom: 'Homme' },
+      ],
       init() {
         const u = new URLSearchParams(location.search);
-        this.q = (u.get('q') ?? '').trim();
-        this.rayon = u.get('rayon') ?? '';
-        this.public = u.get('public') ?? '';
-        this.nouveautes = u.has('nouveautes');
+        if (u.has('q')) {
+          this.mode = 'recherche';
+          this.q = u.get('q').trim();
+        } else if (u.has('rayon') || u.has('nouveautes')) {
+          this.mode = 'rayon';
+          this.rayon = u.get('rayon') ?? '';
+          this.nouveautes = u.has('nouveautes');
+          this.public = u.get('public') ?? '';
+          this.tri = 'nouveautes';
+        }
+        // L’adresse suit la recherche et le choix Pour qui : un lien partagé montre la même chose.
+        this.$watch('q', () => {
+          this.parmi = '';
+          this.reecrire({ q: this.q });
+        });
+        this.$watch('public', () => this.reecrire({ public: this.public }));
         // Le nombre de colonnes décide quelles cases se touchent.
         const tablette = matchMedia('(min-width: 45rem)');
         const ordinateur = matchMedia('(min-width: 67.5rem)');
@@ -434,28 +529,78 @@
         tablette.addEventListener('change', compter);
         ordinateur.addEventListener('change', compter);
       },
+      reecrire(valeurs) {
+        const u = new URLSearchParams(location.search);
+        Object.entries(valeurs).forEach(([cle, v]) => (v || cle === 'q' ? u.set(cle, v) : u.delete(cle)));
+        history.replaceState(null, '', `?${u}${location.hash}`);
+      },
       get vue() {
         return this.$store.vue.nom;
       },
-      get pieces() {
+      // Avant les choix faits sur la page (rayon trouvé, filtres).
+      get trouvees() {
+        if (this.mode === 'recherche') return pieces.filter((p) => !this.q || correspond(p, this.q));
+        if (this.mode === 'accueil') return pieces;
         return pieces.filter(
           (p) =>
-            (!this.rayon || p.rayon === this.rayon) &&
-            (!this.public || p.public === this.public || p.public === 'mixte') &&
-            (!this.nouveautes || p.nouveau) &&
-            (!this.q || correspond(p, this.q)),
+            (this.nouveautes ? p.nouveau : this.rayon === 'tout' || p.rayon === this.rayon) &&
+            (!this.public || p.public === this.public || p.public === 'mixte'),
         );
       },
-      get titre() {
-        if (this.q) return pluriel(this.pieces.length);
-        if (this.rayon) return rayonNom(this.rayon);
-        if (this.nouveautes) return 'Nouveautés';
-        return this.public ? capitale(this.public) : '';
+      get pieces() {
+        const f = this.$store.filtres;
+        const tranche = TRANCHES.find((t) => t.code === f.prix);
+        const liste = this.trouvees.filter(
+          (p) =>
+            (!this.parmi || p.rayon === this.parmi) &&
+            (this.mode !== 'rayon' ||
+              ((!f.taille || taillesDe(p).includes(f.taille)) && (!tranche || tranche.garde(p.prix)))),
+        );
+        return [...liste].sort(TRIS[this.tri].ranger);
       },
-      get sousTitre() {
-        if (this.q) return `pour «\u00a0${this.q}\u00a0»`;
-        const pourQui = this.public && (this.rayon || this.nouveautes) ? ` · ${capitale(this.public)}` : '';
-        return pluriel(this.pieces.length) + pourQui;
+      get titre() {
+        if (this.nouveautes) return 'Nouveautés';
+        return this.rayon === 'tout' ? 'Toutes les pièces' : rayonNom(this.rayon);
+      },
+      get nombre() {
+        return pluriel(this.pieces.length);
+      },
+      // Recherche : « Tout 3 », « Hauts 1 »… seulement les rayons trouvés.
+      get rayonsTrouves() {
+        return [
+          { slug: '', nom: 'Tout', n: this.trouvees.length },
+          ...rayons
+            .map((r) => ({ ...r, n: this.trouvees.filter((p) => p.rayon === r.slug).length }))
+            .filter((r) => r.n),
+        ];
+      },
+      get onglets() {
+        const vers = (params) => {
+          const u = new URLSearchParams(params);
+          if (this.public) u.set('public', this.public);
+          return `index.html?${u}`;
+        };
+        return [
+          { nom: 'Tout voir', href: vers({ rayon: 'tout' }), actif: this.rayon === 'tout' },
+          { nom: 'Nouveautés', href: vers({ nouveautes: '1' }), actif: this.nouveautes },
+          ...rayons.map((r) => ({ nom: r.nom, href: vers({ rayon: r.slug }), actif: this.rayon === r.slug })),
+        ];
+      },
+      get triNom() {
+        return TRIS[this.tri].nom;
+      },
+      get tris() {
+        return Object.entries(TRIS)
+          .filter(([code]) => code !== 'pertinence' || this.mode === 'recherche')
+          .map(([code, t]) => ({ code, nom: t.nom }));
+      },
+      // Les tailles proposées dans les filtres : celles des pièces du rayon.
+      get taillesDispo() {
+        return [...new Set(this.trouvees.flatMap(taillesDe))].sort((a, b) => rangTaille(a) - rangTaille(b));
+      },
+      effacerRecherche() {
+        this.q = '';
+        this.$refs.champ.focus();
       },
       // Deux cases voisines, côte à côte ou l’une sur l’autre, n’ont jamais la même teinte.
       get teintes() {
@@ -473,7 +618,7 @@
       lien(p, v) {
         return lienPiece(p, v?.couleur);
       },
-      prix: prixEtiquette,
+      prixEtiquette,
       // Un modèle en plusieurs coloris ouvre d’abord la vue intermédiaire.
       voir(e, p) {
         if (!p.variantes) return;

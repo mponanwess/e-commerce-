@@ -1,10 +1,12 @@
 # La boutique : démo pour les partenaires
 
 Un site statique (HTML, Tailwind, Alpine) qui montre la boutique telle qu’elle
-sera : l’accueil en mosaïque, la fiche produit, la pastille et ses panneaux, le
-paiement, la confirmation et le suivi de commande. Il n’y a pas de serveur : le
-panier et la commande restent dans le navigateur, aucun paiement n’est fait et
-le site est caché des moteurs de recherche.
+sera : l’accueil en mosaïque, les résultats de recherche, les rayons, la fiche
+produit, la pastille et ses panneaux, le paiement, la confirmation et le suivi
+de commande.
+
+Il n’y a pas de serveur : le panier et la commande restent dans le navigateur,
+aucun paiement n’est fait et le site est caché des moteurs de recherche.
 
 ## Le voir sur ta machine
 
@@ -24,10 +26,13 @@ Tout se change dans `js/data.js` : le nom de la boutique, les liens WhatsApp et
 Instagram, les pièces (prix, tailles, stock, photo, place de l’étiquette), la
 livraison et le paiement.
 
-Les photos sont dans `img/`. Celles d’aujourd’hui sont des dessins provisoires :
-remplace-les par tes pièces photographiées à plat, détourées sur fond
-transparent (PNG ou WebP, environ 800 × 800 px), puis change le chemin `image`
-de la pièce dans `js/data.js`.
+Les photos sont dans `img/` : détourées depuis les maquettes, en WebP
+transparent de 640 × 640 px (les coloris noir et ocre du t-shirt sont teintés
+depuis le blanc). Pour une pièce à toi : photo à plat, détourée sur fond
+transparent, au même format, puis change le chemin `image` de la pièce dans
+`js/data.js`. La casquette « Ralph » et les baskets ressemblent à des produits
+de marque : remplace-les avant de montrer le site hors du cercle des
+partenaires.
 
 ## Pendant la présentation
 
@@ -35,6 +40,8 @@ de la pièce dans `js/data.js`.
   le panneau Catalogue, en bas : « Accueil de la démo ».
 - `#catalogue`, `#panier`, `#recherche` ou `#suivre` à la fin d’une adresse
   ouvre ce panneau.
+- `index.html?q=wax` montre les résultats d’une recherche,
+  `index.html?rayon=hauts` un rayon (`?rayon=tout`, `?nouveautes=1` aussi).
 - Le T-shirt délavé montre la vue intermédiaire (trois coloris), le foulard
   l’offre « 3 pour 6 500 FCFA », la commande 0427 d’Aïcha s’affiche tant
   qu’aucune commande n’a été passée.

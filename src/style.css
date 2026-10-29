@@ -49,6 +49,8 @@
   --color-succes: #2e6b4f;
   --color-alerte: #b5452f;
   --color-focus: #5b4a7a;
+  /* Le fond du site : blanc, crème pour l’accueil pastel. */
+  --color-site: #ffffff;
 
   /* L’accueil pastel : le fond de page et les quatre teintes des cases. */
   --color-creme: #f7f4ee;
@@ -87,8 +89,26 @@
 }
 
 @layer base {
+  /* Le site est blanc ; la balise body, elle, est noire : c’est elle qu’on
+     voit tout en bas, sous le pied de page et quand on tire la page vers le
+     haut. Un pan blanc posé au-dessus du haut de la page garde le haut blanc
+     quand on la tire vers le bas. */
+  html,
+  body {
+    background: var(--color-encre);
+  }
+
   body {
     @apply font-sans text-encre antialiased;
+  }
+
+  body::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: -100vh;
+    height: 100vh;
+    background: var(--color-site);
   }
 
   button {
@@ -116,6 +136,22 @@
 }
 
 @layer components {
+  .site {
+    background: var(--color-site);
+  }
+
+  .vue-pastel {
+    --color-site: var(--color-creme);
+  }
+
+  /* viewport-fit=cover : sur un téléphone en paysage, le fond du site va
+     jusqu’aux bords de l’écran, encoche comprise ; le contenu, lui, s’en
+     écarte. --marge : la marge propre de l’élément, en plus. */
+  .bords-surs {
+    padding-left: calc(var(--marge, 0px) + env(safe-area-inset-left, 0px));
+    padding-right: calc(var(--marge, 0px) + env(safe-area-inset-right, 0px));
+  }
+
   .trait {
     fill: none;
     stroke: currentColor;
@@ -383,7 +419,7 @@
     position: absolute;
     z-index: 2;
     inset-inline: 0;
-    bottom: var(--pastille-ecart);
+    bottom: calc(var(--pastille-ecart) + env(safe-area-inset-bottom, 0px));
     display: flex;
     width: fit-content;
     gap: var(--pastille-espace);
@@ -458,26 +494,23 @@
     position: absolute;
     z-index: 1;
     inset-inline: 0;
-    bottom: calc(var(--pastille-ecart) + var(--pastille-bouton) + 2 * var(--pastille-marge) + 14px);
+    bottom: calc(var(--pastille-ecart) + env(safe-area-inset-bottom, 0px) + var(--pastille-bouton) + 2 * var(--pastille-marge) + 14px);
     width: var(--panneau-largeur);
-    max-height: calc(100dvh - var(--pastille-ecart) - var(--pastille-bouton) - 2 * var(--pastille-marge) - 3.5rem);
+    max-height: calc(100dvh - var(--pastille-ecart) - env(safe-area-inset-bottom, 0px) - var(--pastille-bouton) - 2 * var(--pastille-marge) - 3.5rem);
     margin-inline: auto;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 24px 24px 20px;
     border: 1px solid rgb(242 235 221 / 0.14);
     border-radius: 24px;
-    background: rgb(30 26 22 / 0.8);
+    background: var(--color-encre);
     box-shadow: 0 14px 40px rgb(0 0 0 / 0.4);
     color: var(--color-texte-panneau);
-    -webkit-backdrop-filter: blur(24px) saturate(1.6);
-    backdrop-filter: blur(24px) saturate(1.6);
   }
 
   /* Sans flou possible, les verres passent en plein. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .pastille,
-    .panneau,
     .bouton-infos {
       background: var(--color-encre);
     }
@@ -515,14 +548,46 @@
 
   .panneau-lien {
     display: flex;
-    min-height: 44px;
+    min-height: 52px;
     align-items: center;
     justify-content: space-between;
     padding-block: 8px;
-    border-bottom: 1px solid var(--color-sombre-survol);
+    border-top: 1px solid var(--color-sombre-survol);
     color: var(--color-encre-claire);
     font-size: 20px;
     line-height: 1.2;
+  }
+
+  /* Le choix de la quantité dans le panier : − 1 + */
+  .quantite {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    border: 1px solid var(--color-encre-douce);
+    border-radius: 999px;
+  }
+
+  .quantite button {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border-radius: 999px;
+    color: var(--color-encre-claire);
+  }
+
+  .quantite button:hover:not(:disabled) {
+    background: var(--color-sombre-survol);
+  }
+
+  .quantite button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .quantite svg {
+    width: 18px;
+    height: 18px;
   }
 
   .panneau-lien:hover {
@@ -567,14 +632,14 @@
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    background: var(--color-sol);
+    background: #fff;
     color: var(--color-encre);
     font-size: 16px;
     font-weight: 700;
   }
 
   .bouton-principal:hover {
-    background: #fff;
+    background: var(--color-sol);
   }
 
   .bouton-secondaire {
@@ -600,7 +665,7 @@
     height: 48px;
     padding: 0 18px;
     border-radius: 999px;
-    background: var(--color-sol);
+    background: #fff;
     color: var(--color-encre);
     font-size: 16px;
   }
@@ -611,7 +676,8 @@
 
   /* Le pied de page : une bande fine, quatre liens. */
   .pied {
-    height: 24px;
+    height: calc(24px + env(safe-area-inset-bottom, 0px));
+    padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
     background: var(--color-encre);
   }
 
@@ -804,6 +870,7 @@
     padding: 13px 16px;
     border: 1px solid var(--color-trait);
     border-radius: 16px;
+    background: #fff;
     cursor: pointer;
   }
 
@@ -857,6 +924,189 @@
 
   .bouton-sombre:hover {
     background: var(--color-sombre-survol);
+  }
+
+  /* La recherche, en haut des résultats : un champ large avec sa loupe. */
+  .champ-recherche {
+    display: flex;
+    height: 52px;
+    align-items: center;
+    gap: 12px;
+    padding-inline: 18px 6px;
+    border: 1px solid var(--color-trait);
+    border-radius: 999px;
+    background: #fff;
+
+    @variant md {
+      height: 56px;
+    }
+  }
+
+  .champ-recherche:focus-within {
+    border-color: var(--color-encre);
+  }
+
+  .champ-recherche input {
+    min-width: 0;
+    height: 100%;
+    flex: 1;
+    background: none;
+    font-size: 17px;
+    outline: none;
+  }
+
+  .champ-recherche input::-webkit-search-cancel-button {
+    display: none;
+  }
+
+  /* Un choix sur la page claire (rayons trouvés) : pilule à contour, pleine une fois choisie. */
+  .puce-claire {
+    display: inline-flex;
+    height: 44px;
+    align-items: center;
+    gap: 5px;
+    padding-inline: 16px;
+    border: 1px solid var(--color-trait);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--color-encre);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .puce-claire:hover {
+    border-color: var(--color-encre-douce);
+  }
+
+  .puce-claire[aria-pressed="true"] {
+    border-color: var(--color-encre);
+    background: var(--color-encre);
+    color: #fff;
+  }
+
+  .puce-claire .compte {
+    color: var(--color-encre-douce);
+    font-weight: 400;
+  }
+
+  .puce-claire[aria-pressed="true"] .compte {
+    color: rgb(255 255 255 / 0.7);
+  }
+
+  /* Tout / Femme / Homme : un choix dans une pilule claire. */
+  .segment {
+    display: inline-flex;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 999px;
+    background: var(--color-fond-doux);
+  }
+
+  .segment button {
+    height: 40px;
+    padding-inline: 18px;
+    border-radius: 999px;
+    color: var(--color-encre-douce);
+    font-size: 15px;
+    font-weight: 600;
+
+    @variant lg {
+      height: 44px;
+      padding-inline: 20px;
+    }
+  }
+
+  .segment button:hover {
+    color: var(--color-encre);
+  }
+
+  .segment button[aria-pressed="true"] {
+    background: var(--color-encre);
+    color: #fff;
+  }
+
+  /* Les rayons, en onglets, sur une ligne qui défile sur mobile. */
+  .onglets {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--color-trait);
+    scrollbar-width: none;
+  }
+
+  .onglets a {
+    display: flex;
+    height: 48px;
+    flex: none;
+    align-items: center;
+    color: var(--color-encre-douce);
+    font-size: 15px;
+    font-weight: 600;
+
+    @variant lg {
+      font-size: 16px;
+    }
+  }
+
+  .onglets a:hover,
+  .onglets a[aria-current="page"] {
+    color: var(--color-encre);
+  }
+
+  .bouton-filtres {
+    display: inline-flex;
+    height: 48px;
+    align-items: center;
+    gap: 10px;
+    padding-inline: 20px;
+    border: 1px solid var(--color-trait);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--color-encre);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .bouton-filtres:hover {
+    border-color: var(--color-encre-douce);
+  }
+
+  /* « Trier : Nouveautés » : deux mots soulignés, le second est une liste. */
+  .tri {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .tri-mot {
+    border-bottom: 1.5px solid currentColor;
+    line-height: 1.3;
+  }
+
+  .tri-choix {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .tri-choix select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .tri-choix:has(select:focus-visible) {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  .tri option {
+    color: var(--color-encre);
   }
 
   .bouton-contour {

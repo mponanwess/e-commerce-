@@ -2,15 +2,16 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
   <title>Paiement · Nom de la boutique</title>
   <link rel="icon" href="data:,">
   <link rel="preload" href="fonts/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="flex min-h-dvh flex-col bg-white" x-data="paiement">
-  <header class="relative flex h-16 items-center justify-center px-14 lg:h-20">
+<body class="flex min-h-dvh flex-col" x-data="paiement">
+  <header class="site bords-surs">
+    <div class="relative flex h-16 items-center justify-center px-14 lg:h-20">
     <a href="index.html" class="absolute top-1/2 left-1 grid size-11 -translate-y-1/2 place-items-center md:left-3" aria-label="Retour à l’étal">
       <svg class="trait size-5" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
     </a>
@@ -19,9 +20,10 @@
       <svg class="trait size-4" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
       <span class="sr-only md:not-sr-only">Paiement sécurisé</span>
     </p>
+  </div>
   </header>
 
-  <main class="flex-1 px-4 pt-2 pb-16 md:px-6">
+  <main class="site bords-surs flex-1 pt-2 pb-16 [--marge:1rem] md:[--marge:1.5rem]">
     <div class="py-20 text-center" x-show="!$store.panier.nombre" x-cloak>
       <p class="mot">Ton panier est vide.</p>
       <p class="mt-3 text-encre-douce">Choisis d’abord une pièce sur l’étal.</p>
@@ -44,7 +46,7 @@
           <ul>
             <template x-for="a in $store.panier.articles" :key="a.cle">
               <li class="flex items-center gap-3 border-b border-trait py-3">
-                <span class="relative grid size-12 shrink-0 place-items-center rounded-xl border border-trait bg-white p-1">
+                <span class="relative grid size-12 shrink-0 place-items-center rounded-xl bg-white p-1">
                   <img :src="a.image" alt="" class="size-full object-contain">
                   <span class="absolute -top-1.5 -right-1.5 grid size-5 place-items-center rounded-full bg-encre text-[10px] font-bold text-white" x-text="a.qte"></span>
                 </span>

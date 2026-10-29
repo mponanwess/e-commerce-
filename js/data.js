@@ -8,6 +8,8 @@
      où se trouve le nom ; etiquette.incl : son inclinaison, entre -4 et 4.
    - avant : l’ancien prix, barré à la main. lot : une offre « 3 pour … ».
    - mot : le petit mot écrit sous le prix (« dernière paire »).
+   - arrive : la date d’arrivée, pour le tri « Nouveautés » ; nouveau : la
+     pièce figure dans les Nouveautés.
    - tailles : stock par taille ; 0 = épuisée, barrée sur la fiche.
    - variantes : les coloris d’un même modèle, montrés côte à côte avant la
      fiche ; chacun a sa photo et ses tailles. */
@@ -35,14 +37,25 @@ window.ETAL = {
     { slug: 'accessoires', nom: 'Accessoires' },
   ],
 
+  // Les liens proposés sous le champ du panneau Recherche.
+  suggestions: [
+    { libelle: 'Chemise wax', lien: 'produit.html?p=chemise-wax' },
+    { libelle: 'Jean brut', lien: 'produit.html?p=jean-brut' },
+    { libelle: 'Baskets', lien: 'produit.html?p=baskets' },
+    { libelle: 'Pièces en wax', lien: 'index.html?q=wax' },
+    { libelle: 'Nouveautés de la semaine', lien: 'index.html?nouveautes=1' },
+  ],
+
   pieces: [
     {
       slug: 'chemise-wax',
+      arrive: '2026-10-27',
       nom: 'Chemise wax',
       rayon: 'hauts',
       public: 'homme',
       prix: 10000,
-      image: 'img/chemise-wax.svg',
+      nouveau: true,
+      image: 'img/chemise-wax.webp',
       etiquette: { place: 'hd', incl: -3 },
       tailles: [
         { t: 'XS', stock: 0 },
@@ -63,6 +76,7 @@ window.ETAL = {
     },
     {
       slug: 'tshirt-delave',
+      arrive: '2026-10-23',
       nom: 'T-shirt délavé',
       rayon: 'hauts',
       public: 'mixte',
@@ -73,19 +87,19 @@ window.ETAL = {
         {
           couleur: 'blanc',
           nom: 'Blanc',
-          image: 'img/tshirt-blanc.svg',
+          image: 'img/tshirt-blanc.webp',
           tailles: [{ t: 'S', stock: 1 }, { t: 'M', stock: 1 }, { t: 'L', stock: 0 }],
         },
         {
           couleur: 'noir',
           nom: 'Noir',
-          image: 'img/tshirt-noir.svg',
+          image: 'img/tshirt-noir.webp',
           tailles: [{ t: 'S', stock: 0 }, { t: 'M', stock: 1 }, { t: 'L', stock: 1 }],
         },
         {
           couleur: 'ocre',
           nom: 'Ocre',
-          image: 'img/tshirt-ocre.svg',
+          image: 'img/tshirt-ocre.webp',
           tailles: [{ t: 'S', stock: 1 }, { t: 'M', stock: 1 }, { t: 'L', stock: 1 }],
         },
       ],
@@ -100,11 +114,12 @@ window.ETAL = {
     },
     {
       slug: 'short-lin',
+      arrive: '2026-10-03',
       nom: 'Short en lin',
       rayon: 'bas',
       public: 'homme',
       prix: 4000,
-      image: 'img/short-lin.svg',
+      image: 'img/short-lin.webp',
       etiquette: { place: 'hd', incl: -2 },
       tailles: [{ t: 'M', stock: 1 }],
       infos: {
@@ -118,12 +133,13 @@ window.ETAL = {
     },
     {
       slug: 'jean-brut',
+      arrive: '2026-10-05',
       nom: 'Jean brut',
       rayon: 'bas',
       public: 'mixte',
       prix: 9000,
       avant: 12000,
-      image: 'img/jean-brut.svg',
+      image: 'img/jean-brut.webp',
       etiquette: { place: 'hg', incl: 3 },
       tailles: [{ t: '32', stock: 1 }],
       infos: {
@@ -137,11 +153,12 @@ window.ETAL = {
     },
     {
       slug: 'casquette',
+      arrive: '2026-09-30',
       nom: 'Casquette',
       rayon: 'accessoires',
       public: 'mixte',
       prix: 3500,
-      image: 'img/casquette.svg',
+      image: 'img/casquette.webp',
       etiquette: { place: 'bd', incl: -2 },
       tailles: [{ t: 'TU', stock: 1 }],
       infos: {
@@ -155,11 +172,12 @@ window.ETAL = {
     },
     {
       slug: 'cabas-tresse',
+      arrive: '2026-09-28',
       nom: 'Cabas tressé',
       rayon: 'accessoires',
       public: 'femme',
       prix: 6500,
-      image: 'img/cabas-tresse.svg',
+      image: 'img/cabas-tresse.webp',
       etiquette: { place: 'hd', incl: 3 },
       tailles: [{ t: 'TU', stock: 1 }],
       infos: {
@@ -173,13 +191,14 @@ window.ETAL = {
     },
     {
       slug: 'baskets',
+      arrive: '2026-10-20',
       nom: 'Baskets',
       rayon: 'chaussures',
       public: 'mixte',
       prix: 16500,
       mot: 'dernière paire',
       nouveau: true,
-      image: 'img/baskets.svg',
+      image: 'img/baskets.webp',
       etiquette: { place: 'hg', incl: -3 },
       tailles: [{ t: '42', stock: 1 }],
       infos: {
@@ -193,13 +212,14 @@ window.ETAL = {
     },
     {
       slug: 'robe-imprimee',
+      arrive: '2026-10-21',
       nom: 'Robe imprimée',
       rayon: 'robes',
       public: 'femme',
       prix: 12500,
       avant: 16000,
       nouveau: true,
-      image: 'img/robe-imprimee.svg',
+      image: 'img/robe-imprimee.webp',
       etiquette: { place: 'md', incl: -2 },
       tailles: [{ t: 'S', stock: 1 }, { t: 'M', stock: 1 }],
       infos: {
@@ -213,11 +233,12 @@ window.ETAL = {
     },
     {
       slug: 'bob',
+      arrive: '2026-09-25',
       nom: 'Bob',
       rayon: 'accessoires',
       public: 'mixte',
       prix: 2500,
-      image: 'img/bob.svg',
+      image: 'img/bob.webp',
       etiquette: { place: 'hg', incl: 2 },
       tailles: [{ t: 'TU', stock: 1 }],
       infos: {
@@ -231,12 +252,13 @@ window.ETAL = {
     },
     {
       slug: 'foulard',
+      arrive: '2026-09-20',
       nom: 'Foulard',
       rayon: 'accessoires',
       public: 'femme',
       prix: 2500,
       lot: { quantite: 3, prix: 6500 },
-      image: 'img/foulard.svg',
+      image: 'img/foulard.webp',
       etiquette: { place: 'hg', incl: -3 },
       tailles: [{ t: 'TU', stock: 6 }],
       infos: {
@@ -250,11 +272,12 @@ window.ETAL = {
     },
     {
       slug: 'pull-col-rond',
+      arrive: '2026-10-08',
       nom: 'Pull col rond',
       rayon: 'hauts',
       public: 'mixte',
       prix: 6000,
-      image: 'img/pull-col-rond.svg',
+      image: 'img/pull-col-rond.webp',
       etiquette: { place: 'hd', incl: 3 },
       tailles: [{ t: 'L', stock: 1 }],
       infos: {
@@ -268,13 +291,14 @@ window.ETAL = {
     },
     {
       slug: 'veste-travail',
+      arrive: '2026-10-25',
       nom: 'Veste de travail',
       rayon: 'hauts',
       public: 'homme',
       prix: 14500,
       mot: 'dernière\u00a0!',
       nouveau: true,
-      image: 'img/veste-travail.svg',
+      image: 'img/veste-travail.webp',
       etiquette: { place: 'hg', incl: 1.5 },
       tailles: [{ t: 'L', stock: 1 }],
       infos: {
