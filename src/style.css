@@ -89,12 +89,15 @@
 }
 
 @layer base {
-  /* Le site est blanc. Derrière lui, la balise body passe du blanc (en haut)
-     au noir (en bas) : on la voit aux bords, quand on tire la page au-delà de
-     son début ou de sa fin. La page elle-même (html) est noire, comme le pied ;
-     un pan blanc posé au-dessus du haut de la page garde le haut blanc. */
+  /* Le site est blanc. Le dégradé n’apparaît qu’aux bords, quand on tire la
+     page au-delà de son début (blanc) ou de sa fin (noir) :
+     - html, ce qui se découvre alors : une moitié blanche en haut de l’écran,
+       une noire en bas, fixées à l’écran ;
+     - body : un dégradé vertical, du blanc en haut au noir en bas ;
+     - un pan blanc posé au-dessus du haut de la page, pour les navigateurs qui
+       ne fixent pas le fond (Safari sur iPhone). */
   html {
-    background: var(--color-encre);
+    background: var(--color-encre) linear-gradient(to bottom, #fff 50%, var(--color-encre) 50%) no-repeat fixed;
   }
 
   body {

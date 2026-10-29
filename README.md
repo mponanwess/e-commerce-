@@ -53,7 +53,9 @@ hors du cercle des partenaires.
 ## Mettre en ligne sur GitHub Pages
 
 1. Avant chaque envoi : `docker compose run --rm npm run build` (CSS minifié,
-   Alpine et polices à jour).
+   Alpine et polices à jour, et l’empreinte de chaque fichier ajoutée à ses
+   liens : sans elle, GitHub Pages ressert l’ancienne version pendant 10
+   minutes).
 2. Envoie le dépôt sur GitHub, puis dans Settings → Pages, choisis « Deploy from
    a branch », branche `main`, dossier `/ (root)`.
 3. Le site est servi à `https://<ton-compte>.github.io/<nom-du-depot>/`. Tous
