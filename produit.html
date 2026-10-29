@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Nom de la boutique</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" href="fonts/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="flex min-h-dvh flex-col bg-white" x-data="fiche">
+  <header class="relative flex h-16 items-center justify-center px-14 lg:h-20">
+    <a href="index.html" class="absolute top-1/2 left-1 grid size-11 -translate-y-1/2 place-items-center md:left-3" aria-label="Retour à l’étal">
+      <svg class="trait size-5" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+    </a>
+    <a href="index.html" class="marque" :class="$store.vue.nom === 'pastel' && 'marque--serif'" x-text="$store.boutique.nom">Nom de la boutique</a>
+  </header>
+
+  <main class="flex-1">
+    <template x-if="!piece">
+      <div class="px-4 py-24 text-center">
+        <p class="mot">Partie, celle-là&nbsp;!</p>
+        <p class="mt-3 text-encre-douce">Cette pièce n’est plus sur l’étal.</p>
+        <a href="index.html" class="mt-4 inline-flex h-11 items-center font-semibold underline underline-offset-4">Retourner fouiller l’étal</a>
+      </div>
+    </template>
+
+    <template x-if="piece">
+      <article class="mx-auto flex max-w-[1100px] flex-col items-center pt-2 pb-32 md:px-6">
+        <div class="grid w-full grid-cols-[44px_1fr_44px] items-center md:grid-cols-[48px_1fr_48px]">
+          <a :href="voisine(-1)" class="grid size-11 place-items-center md:size-12" aria-label="Pièce précédente">
+            <svg class="trait size-7" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+          </a>
+
+          <div class="fiche-image">
+            <img class="article" :src="piece.image" :alt="piece.nom + ', posée à plat'" width="400" height="400">
+            <button type="button" class="bouton-infos" :aria-expanded="String(infos)" aria-controls="infos" @click="infos = !infos">
+              <span x-text="infos ? 'Moins d’infos' : 'Plus d’infos'"></span>
+              <svg class="trait size-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14" x-show="!infos"/></svg>
+            </button>
+            <div id="infos" class="infos" x-show="infos" x-cloak x-transition.opacity.duration.200ms>
+              <dl class="grid gap-4">
+                <template x-for="[intitule, valeur] in lignesInfos" :key="intitule">
+                  <div>
+                    <dt class="intitule-info" x-text="intitule"></dt>
+                    <dd class="mt-1 text-[15px] leading-snug" x-text="valeur"></dd>
+                  </div>
+                </template>
+              </dl>
+            </div>
+          </div>
+
+          <a :href="voisine(1)" class="grid size-11 place-items-center justify-self-end md:size-12" aria-label="Pièce suivante">
+            <svg class="trait size-7" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+          </a>
+        </div>
+
+        <h1 class="nom-produit mt-7 px-4 text-center" x-text="piece.nom"></h1>
+
+        <p class="etiquette etiquette--libre mt-3 text-[28px]" style="--incl: -2deg">
+          <span class="etiquette-papier">
+            <s class="etiquette-avant" x-show="piece.avant" x-text="piece.avant && $fcfa(piece.avant)"></s><span x-text="prix(piece)"></span>
+            <span class="etiquette-mot" x-show="piece.mot" x-text="piece.mot"></span>
+          </span>
+        </p>
+
+        <nav class="mt-6" aria-label="Coloris" x-show="piece.coloris">
+          <ul class="flex flex-wrap justify-center gap-2">
+            <template x-for="v in base.variantes ?? []" :key="v.couleur">
+              <li><a class="taille" :href="lien(v)" :aria-current="v.couleur === piece.coloris?.couleur ? 'true' : null" x-text="v.nom"></a></li>
+            </template>
+          </ul>
+        </nav>
+
+        <div class="mt-4 flex flex-wrap justify-center gap-2" role="group" :aria-label="piece.rayon === 'chaussures' ? 'Pointure' : 'Taille'">
+          <template x-for="t in piece.tailles" :key="t.t">
+            <button type="button" class="taille" :aria-pressed="String(taille === t.t)" :aria-disabled="String(!t.stock)" @click="choisir(t)">
+              <span x-text="t.t"></span><template x-if="!t.stock"><span class="sr-only">, épuisée</span></template>
+            </button>
+          </template>
+        </div>
+
+        <button type="button" class="bouton-plus mt-4" :aria-label="ajoutee ? 'Ajouté au panier' : 'Ajouter au panier'" @click="ajouter()">
+          <svg class="trait" viewBox="0 0 24 24" aria-hidden="true" x-show="!ajoutee"><path d="M12 4v16M4 12h16"/></svg>
+          <svg class="trait" viewBox="0 0 24 24" aria-hidden="true" x-show="ajoutee" x-cloak><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+        </button>
+        <p class="mot mt-1 min-h-[1.5em]" :class="ton === 'succes' ? 'text-succes' : 'text-alerte'" role="status" x-text="message"></p>
+      </article>
+    </template>
+
+    <div class="pastille-ancre" id="pastille"></div>
+  </main>
+
+  <footer class="pied" id="pied"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="vendor/alpine.min.js" defer></script>
+</body>
+</html>

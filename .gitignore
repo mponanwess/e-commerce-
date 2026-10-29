@@ -1,0 +1,10 @@
+# Système et éditeurs
+.DS_Store
+.vscode/
+.idea/
+
+# Dépendances : installées par npm, jamais versionnées.
+node_modules/
+
+# css/, fonts/ et vendor/ sont construits mais versionnés : GitHub Pages sert
+# le dépôt tel quel, sans étape de construction.

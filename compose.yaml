@@ -1,0 +1,36 @@
+name: etal
+
+services:
+  # npm, sans Node installé sur la machine : docker compose run --rm npm install
+  npm:
+    image: node:24.20.0-slim
+    working_dir: /usr/src/app
+    entrypoint: ["npm"]
+    profiles: ["tools"]
+    user: "${UID:-1000}:${GID:-1000}"
+    environment:
+      # Pas d'annonce de nouvelle version de npm à chaque commande.
+      NPM_CONFIG_UPDATE_NOTIFIER: "false"
+    volumes:
+      - .:/usr/src/app
+
+  # Recompile css/style.css dès qu'une page ou un script change.
+  tailwind:
+    image: node:24.20.0-slim
+    working_dir: /usr/src/app
+    command: ["npm", "run", "watch"]
+    # Sans init, Docker attend 10 s avant de couper le watcher.
+    init: true
+    user: "${UID:-1000}:${GID:-1000}"
+    environment:
+      NPM_CONFIG_UPDATE_NOTIFIER: "false"
+    volumes:
+      - .:/usr/src/app
+
+  # Le site tel que GitHub Pages le servira : http://localhost:8080
+  web:
+    image: nginx:1.30.5-alpine
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - .:/usr/share/nginx/html:ro

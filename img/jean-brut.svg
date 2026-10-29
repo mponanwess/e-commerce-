@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>
+    <radialGradient id="d"><stop offset="0" stop-color="#a9c0dc" stop-opacity=".75"/><stop offset="1" stop-color="#a9c0dc" stop-opacity="0"/></radialGradient>
+    <path id="f" d="M128 40H272L284 362H210L200 150 190 362H116Z"/>
+    <clipPath id="c"><use href="#f"/></clipPath>
+  </defs>
+  <use href="#f" fill="#3b5d8c"/>
+  <g clip-path="url(#c)">
+    <ellipse cx="160" cy="150" rx="30" ry="70" fill="url(#d)"/><ellipse cx="240" cy="150" rx="30" ry="70" fill="url(#d)"/>
+    <ellipse cx="154" cy="262" rx="22" ry="34" fill="url(#d)"/><ellipse cx="246" cy="262" rx="22" ry="34" fill="url(#d)"/>
+  </g>
+  <path d="M128 40H272V62H128Z" fill="#33547f"/>
+  <circle cx="200" cy="51" r="4.5" fill="#c9a86a"/>
+  <path d="M148 40V64M200 62V140M252 40V64" stroke="#284569" stroke-width="3"/>
+  <g fill="none" stroke="#c8893a" stroke-width="1.6" stroke-dasharray="4 3" stroke-opacity=".8">
+    <path d="M134 68C150 92 166 98 180 98M266 68C250 92 234 98 220 98"/>
+    <path d="M200 64V136C198 142 192 146 184 146M126 70 118 356M274 70 282 356"/>
+  </g>
+  <use href="#f" fill="url(#l)"/>
+</svg>

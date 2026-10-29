@@ -1,0 +1,877 @@
+@import "tailwindcss";
+
+/* Alpine, copié tel quel dans vendor/, n’a aucune classe à fournir. */
+@source not "../vendor";
+
+@font-face {
+  font-family: "Archivo";
+  src: url("../fonts/archivo.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Permanent Marker";
+  src: url("../fonts/permanent-marker.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("../fonts/cormorant-garamond.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+/* Les valeurs du design system « Marché mosaïque ». « static » : les teintes
+   des cases sont choisies en JavaScript, Tailwind ne les voit pas passer. */
+@theme static {
+  --font-sans: "Archivo", system-ui, sans-serif;
+  --font-main: "Permanent Marker", cursive;
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+
+  /* Trois vues : mobile, tablette dès 720px, ordinateur dès 1080px. */
+  --breakpoint-md: 45rem;
+  --breakpoint-lg: 67.5rem;
+
+  --color-sol: #f2ebdd;
+  --color-encre: #1e1a16;
+  --color-encre-douce: #5a5047;
+  --color-encre-claire: #f4efe6;
+  --color-texte-panneau: #d9cfbf;
+  --color-sombre-survol: #3a332c;
+  --color-texte-desactive: #8a8178;
+  --color-trait: #d9d3ca;
+  --color-fond-doux: #f4f1ec;
+  --color-kraft: #e4cfa3;
+  --color-accent: #e3b23c;
+  --color-succes: #2e6b4f;
+  --color-alerte: #b5452f;
+  --color-focus: #5b4a7a;
+
+  /* L’accueil pastel : le fond de page et les quatre teintes des cases. */
+  --color-creme: #f7f4ee;
+  --color-lin: #eee7dc;
+  --color-argile: #e3d9ca;
+  --color-sauge: #dce0d6;
+  --color-sable: #efe3cb;
+}
+
+/* La pastille grandit avec l’écran. Sa hauteur vaut bouton + 2 × marge + 2px
+   de liseré : 60px, 66px puis 70px. */
+:root {
+  --pastille-bouton: 48px;
+  --pastille-icone: 20px;
+  --pastille-marge: 5px;
+  --pastille-espace: 4px;
+  --pastille-ecart: 16px;
+  --panneau-largeur: calc(100vw - 32px);
+
+  @variant md {
+    --pastille-bouton: 52px;
+    --pastille-icone: 22px;
+    --pastille-marge: 6px;
+    --pastille-espace: 6px;
+    --pastille-ecart: 20px;
+    --panneau-largeur: 380px;
+  }
+
+  @variant lg {
+    --pastille-bouton: 56px;
+    --pastille-icone: 24px;
+    --pastille-espace: 8px;
+    --pastille-ecart: 24px;
+    --panneau-largeur: 400px;
+  }
+}
+
+@layer base {
+  body {
+    @apply font-sans text-encre antialiased;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  [x-cloak] {
+    display: none !important;
+  }
+
+  /* Les panneaux et la vue intermédiaire apparaissent sans glisser. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .trait {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Sur fond sombre, le focus passe au jaune. */
+  .sur-sombre :focus-visible,
+  .pied :focus-visible {
+    outline-color: var(--color-accent);
+  }
+
+  /* Le nom de la boutique, écrit à la main. */
+  .marque {
+    display: inline-block;
+    font-family: var(--font-main);
+    font-size: 17px;
+    line-height: 44px;
+    text-transform: uppercase;
+    rotate: -2deg;
+
+    @variant md {
+      font-size: 24px;
+    }
+  }
+
+  /* Le nom dans l’accueil pastel : capitales espacées, à empattements. */
+  .marque--serif {
+    margin-right: -0.26em;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.26em;
+    white-space: nowrap;
+    rotate: 0deg;
+
+    @variant md {
+      margin-right: -0.38em;
+      font-size: 22px;
+      letter-spacing: 0.38em;
+    }
+  }
+
+  .titre-main {
+    display: inline-block;
+    font-family: var(--font-main);
+    line-height: 1.1;
+    rotate: -2deg;
+  }
+
+  /* Un petit mot du vendeur : confirmation ou alerte. */
+  .mot {
+    display: inline-block;
+    font-family: var(--font-main);
+    font-size: 18px;
+    line-height: 1.2;
+    rotate: -2deg;
+  }
+
+  /* Une case de l’étal : la pièce posée à plat, son étiquette et son nom. */
+  .case {
+    position: relative;
+    display: block;
+    container-type: inline-size;
+  }
+
+  .case-image {
+    position: relative;
+    aspect-ratio: 1;
+  }
+
+  .article {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 7px 6px rgb(0 0 0 / 0.3));
+    transition: translate 0.25s ease;
+  }
+
+  .case:hover .article {
+    translate: 0 -4px;
+  }
+
+  .case-libelle {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-transform: uppercase;
+
+    @variant md {
+      font-size: 12px;
+    }
+
+    @variant lg {
+      font-size: 13px;
+    }
+  }
+
+  .etal--blanc .case-image {
+    padding: 6%;
+  }
+
+  .etal--blanc .case-libelle {
+    margin-top: 2px;
+    padding-inline: 4px;
+  }
+
+  .etal--blanc .case-numero {
+    display: none;
+  }
+
+  .etal--pastel .case {
+    display: flex;
+    aspect-ratio: 1;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 6%;
+    background: var(--case, var(--color-lin));
+  }
+
+  .etal--pastel .case-image {
+    width: 100%;
+    min-height: 0;
+    flex: 1;
+    aspect-ratio: auto;
+    padding: 15% 19% 3%;
+  }
+
+  .etal--pastel .case-libelle {
+    font-size: 9px;
+    text-align: center;
+
+    @variant md {
+      font-size: 10px;
+    }
+
+    @variant lg {
+      font-size: 11px;
+    }
+  }
+
+  .etal--pastel .case-numero {
+    font-family: var(--font-serif);
+    font-size: 12px;
+    font-variant-numeric: oldstyle-nums;
+    color: var(--color-encre-douce);
+
+    @variant lg {
+      font-size: 14px;
+    }
+  }
+
+  /* Le prix au marqueur, sur un bout de papier scotché au bord bas déchiré. */
+  .etiquette {
+    --incl: 0deg;
+    position: absolute;
+    z-index: 2;
+    rotate: var(--incl);
+    filter: drop-shadow(0 3px 3px rgb(0 0 0 / 0.28));
+    font-family: var(--font-main);
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--color-encre);
+    pointer-events: none;
+  }
+
+  .etiquette::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: -0.3em;
+    left: 50%;
+    width: 2.4em;
+    height: 0.62em;
+    translate: -58% 0;
+    rotate: -5deg;
+    background: rgb(242 235 221 / 0.72);
+  }
+
+  .etiquette-papier {
+    position: relative;
+    display: block;
+    padding: 0.45em 0.65em 0.62em;
+    background: var(--color-kraft);
+    text-align: center;
+    clip-path: polygon(
+      0% 5%, 4% 1%, 33% 3%, 64% 0%, 96% 2%, 100% 0%, 99% 48%, 100% 85%,
+      97% 94%, 93% 88%, 89% 96%, 84% 90%, 79% 98%, 74% 91%, 69% 97%, 63% 90%,
+      58% 98%, 52% 92%, 47% 99%, 41% 91%, 36% 97%, 30% 90%, 25% 98%, 19% 92%,
+      14% 97%, 9% 90%, 5% 96%, 1% 89%, 0% 55%
+    );
+  }
+
+  /* Deux étiquettes voisines ne sont pas déchirées pareil. */
+  .etiquette--b .etiquette-papier {
+    clip-path: polygon(
+      1% 0%, 30% 2%, 58% 0%, 88% 3%, 100% 1%, 100% 52%, 99% 90%, 95% 96%,
+      91% 90%, 86% 97%, 81% 91%, 76% 98%, 70% 92%, 65% 99%, 60% 91%, 54% 97%,
+      49% 90%, 43% 98%, 38% 92%, 32% 97%, 27% 90%, 21% 98%, 16% 91%, 11% 97%,
+      6% 90%, 2% 96%, 0% 88%, 1% 42%
+    );
+  }
+
+  .etiquette-avant {
+    margin-right: 0.3em;
+    font-size: 0.6em;
+    opacity: 0.7;
+    text-decoration-thickness: 0.12em;
+  }
+
+  .etiquette-mot {
+    display: block;
+    margin-top: 0.3em;
+    font-size: 0.38em;
+  }
+
+  /* Sur une case, le prix suit la largeur de la case. */
+  .etiquette--case {
+    font-size: 7cqi;
+  }
+
+  .etal--pastel .etiquette--case {
+    font-size: 6.2cqi;
+  }
+
+  .etiquette--libre {
+    position: relative;
+    display: inline-block;
+  }
+
+  .place-hd {
+    top: 3%;
+    right: 3%;
+  }
+
+  .place-hg {
+    top: 3%;
+    left: 3%;
+  }
+
+  .place-bd {
+    right: 3%;
+    bottom: 6%;
+  }
+
+  .place-md {
+    top: 44%;
+    right: 0;
+  }
+
+  /* La pastille : collée au bas de l’écran pendant le défilement, puis posée
+     au-dessus du pied de page, à la même distance. Son ancre, de hauteur
+     nulle, est le dernier élément du contenu principal. */
+  .pastille-ancre {
+    position: sticky;
+    bottom: 0;
+    z-index: 40;
+    height: 0;
+  }
+
+  .pastille {
+    position: absolute;
+    z-index: 2;
+    inset-inline: 0;
+    bottom: var(--pastille-ecart);
+    display: flex;
+    width: fit-content;
+    gap: var(--pastille-espace);
+    margin-inline: auto;
+    padding: var(--pastille-marge);
+    border: 1px solid rgb(242 235 221 / 0.14);
+    border-radius: 999px;
+    background: rgb(30 26 22 / 0.68);
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.3);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    backdrop-filter: blur(20px) saturate(1.8);
+    transition: background-color 0.2s;
+  }
+
+  /* Un panneau ouvert : la pastille passe en plein. */
+  .pastille.est-pleine {
+    background: var(--color-encre);
+  }
+
+  .pastille-bouton {
+    position: relative;
+    display: grid;
+    width: var(--pastille-bouton);
+    height: var(--pastille-bouton);
+    place-items: center;
+    border-radius: 999px;
+    color: var(--color-encre-claire);
+    transition: background-color 0.15s;
+  }
+
+  .pastille-bouton:hover {
+    background: var(--color-sombre-survol);
+  }
+
+  .pastille-bouton[aria-expanded="true"] {
+    background: var(--color-sol);
+    color: var(--color-encre);
+  }
+
+  .pastille-bouton svg {
+    width: var(--pastille-icone);
+    height: var(--pastille-icone);
+  }
+
+  .compteur {
+    position: absolute;
+    top: 12%;
+    right: 10%;
+    display: grid;
+    min-width: 17px;
+    height: 17px;
+    place-items: center;
+    padding-inline: 4px;
+    border-radius: 999px;
+    background: var(--color-accent);
+    color: var(--color-encre);
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .voile {
+    position: fixed;
+    z-index: 0;
+    inset: 0;
+    background: rgb(30 26 22 / 0.22);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+
+  .panneau {
+    position: absolute;
+    z-index: 1;
+    inset-inline: 0;
+    bottom: calc(var(--pastille-ecart) + var(--pastille-bouton) + 2 * var(--pastille-marge) + 14px);
+    width: var(--panneau-largeur);
+    max-height: calc(100dvh - var(--pastille-ecart) - var(--pastille-bouton) - 2 * var(--pastille-marge) - 3.5rem);
+    margin-inline: auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 24px 24px 20px;
+    border: 1px solid rgb(242 235 221 / 0.14);
+    border-radius: 24px;
+    background: rgb(30 26 22 / 0.8);
+    box-shadow: 0 14px 40px rgb(0 0 0 / 0.4);
+    color: var(--color-texte-panneau);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    backdrop-filter: blur(24px) saturate(1.6);
+  }
+
+  /* Sans flou possible, les verres passent en plein. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .pastille,
+    .panneau,
+    .bouton-infos {
+      background: var(--color-encre);
+    }
+  }
+
+  .panneau-titre {
+    display: inline-block;
+    font-family: var(--font-main);
+    font-size: 24px;
+    line-height: 1.1;
+    color: var(--color-encre-claire);
+    rotate: -2deg;
+    transform-origin: left;
+  }
+
+  .panneau-fermer {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    place-items: center;
+    margin: -10px -12px 0 0;
+    border-radius: 999px;
+    color: var(--color-encre-claire);
+  }
+
+  .panneau-fermer:hover {
+    background: var(--color-sombre-survol);
+  }
+
+  .panneau-fermer svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .panneau-lien {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 8px;
+    border-bottom: 1px solid var(--color-sombre-survol);
+    color: var(--color-encre-claire);
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  .panneau-lien:hover {
+    color: var(--color-accent);
+  }
+
+  .panneau-lien svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .intitule-panneau {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--color-texte-panneau);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .puce {
+    height: 44px;
+    padding-inline: 16px;
+    border: 1px solid var(--color-encre-douce);
+    border-radius: 999px;
+    color: var(--color-encre-claire);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .puce[aria-pressed="true"] {
+    border-color: var(--color-sol);
+    background: var(--color-sol);
+    color: var(--color-encre);
+  }
+
+  .bouton-principal {
+    display: flex;
+    width: 100%;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--color-sol);
+    color: var(--color-encre);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .bouton-principal:hover {
+    background: #fff;
+  }
+
+  .bouton-secondaire {
+    display: flex;
+    width: 100%;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-encre-douce);
+    border-radius: 999px;
+    color: var(--color-encre-claire);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .bouton-secondaire:hover {
+    border-color: var(--color-encre-claire);
+  }
+
+  /* 16px au moins : l’iPhone ne zoome pas sur le champ. */
+  .champ-sombre {
+    width: 100%;
+    height: 48px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: var(--color-sol);
+    color: var(--color-encre);
+    font-size: 16px;
+  }
+
+  .champ-sombre::placeholder {
+    color: var(--color-texte-desactive);
+  }
+
+  /* Le pied de page : une bande fine, quatre liens. */
+  .pied {
+    height: 24px;
+    background: var(--color-encre);
+  }
+
+  .lien-pied {
+    position: relative;
+    color: var(--color-texte-panneau);
+    font-size: 8px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .lien-pied:hover {
+    color: var(--color-accent);
+  }
+
+  /* La bande fait 24px : la zone cliquable déborde au-dessus pour atteindre 44px. */
+  .lien-pied::before {
+    content: "";
+    position: absolute;
+    inset-inline: -8px;
+    bottom: -8px;
+    height: 44px;
+  }
+
+  /* La fiche produit. */
+  /* Sur un écran d’ordinateur peu haut, la photo rétrécit : le « + » reste
+     visible au-dessus de la pastille sans faire défiler. */
+  .fiche-image {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    aspect-ratio: 1;
+    margin-inline: auto;
+
+    @variant lg {
+      max-width: clamp(260px, calc(100dvh - 500px), 560px);
+    }
+  }
+
+  .fiche-image .article {
+    filter: drop-shadow(0 10px 9px rgb(0 0 0 / 0.3));
+  }
+
+  .bouton-infos {
+    position: absolute;
+    z-index: 2;
+    top: 16px;
+    left: 16px;
+    display: flex;
+    height: 44px;
+    align-items: center;
+    gap: 10px;
+    padding-inline: 18px 14px;
+    border-radius: 999px;
+    background: rgb(30 26 22 / 0.68);
+    color: var(--color-encre-claire);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    backdrop-filter: blur(20px) saturate(1.8);
+  }
+
+  .bouton-infos[aria-expanded="true"] {
+    background: var(--color-encre);
+  }
+
+  .infos {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    overflow-y: auto;
+    padding: 76px 24px 24px;
+    background: rgb(242 235 221 / 0.72);
+    -webkit-backdrop-filter: blur(22px);
+    backdrop-filter: blur(22px);
+  }
+
+  .intitule-info {
+    color: var(--color-encre-douce);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .nom-produit {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  /* Une taille, écrite en texte : soulignée quand elle est choisie, barrée
+     quand elle est épuisée. */
+  .taille {
+    display: inline-grid;
+    min-width: 44px;
+    height: 44px;
+    place-items: center;
+    padding-inline: 6px;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+  }
+
+  .taille:hover:not([aria-disabled="true"]) {
+    text-decoration: underline 1px;
+    text-underline-offset: 7px;
+  }
+
+  .taille[aria-pressed="true"],
+  .taille[aria-current="true"] {
+    font-weight: 700;
+    text-decoration: underline 2px;
+    text-underline-offset: 7px;
+  }
+
+  .taille[aria-disabled="true"] {
+    color: var(--color-texte-desactive);
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+
+  .bouton-plus {
+    display: grid;
+    width: 56px;
+    height: 56px;
+    place-items: center;
+    border-radius: 999px;
+  }
+
+  .bouton-plus:hover {
+    background: rgb(30 26 22 / 0.08);
+  }
+
+  .bouton-plus svg {
+    width: 30px;
+    height: 30px;
+    stroke-width: 1.5;
+  }
+
+  /* Le paiement et les pages qui le suivent. */
+  .intitule {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--color-encre-douce);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .champ {
+    width: 100%;
+    height: 48px;
+    padding: 0 18px;
+    border: 1px solid var(--color-trait);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 16px;
+  }
+
+  .champ::placeholder {
+    color: #a39a90;
+  }
+
+  .champ[aria-invalid="true"] {
+    border-color: var(--color-alerte);
+  }
+
+  .erreur {
+    margin-top: 6px;
+    color: var(--color-alerte);
+    font-size: 13px;
+  }
+
+  .encart {
+    padding: 16px;
+    border-radius: 20px;
+    background: var(--color-fond-doux);
+  }
+
+  /* Un choix de livraison ou de paiement : une carte avec son bouton radio. */
+  .choix {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    border: 1px solid var(--color-trait);
+    border-radius: 16px;
+    cursor: pointer;
+  }
+
+  .choix:has(:checked) {
+    border-color: var(--color-encre);
+    box-shadow: inset 0 0 0 0.5px var(--color-encre);
+  }
+
+  .choix:has(:disabled) {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .radio {
+    display: grid;
+    width: 20px;
+    height: 20px;
+    flex: none;
+    appearance: none;
+    place-content: center;
+    border: 1.5px solid var(--color-encre);
+    border-radius: 999px;
+  }
+
+  .radio::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--color-encre);
+    scale: 0;
+    transition: scale 0.12s;
+  }
+
+  .radio:checked::before {
+    scale: 1;
+  }
+
+  .bouton-sombre {
+    display: flex;
+    width: 100%;
+    height: 52px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--color-encre);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .bouton-sombre:hover {
+    background: var(--color-sombre-survol);
+  }
+
+  .bouton-contour {
+    display: flex;
+    width: 100%;
+    height: 52px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-trait);
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .bouton-contour:hover {
+    border-color: var(--color-encre);
+  }
+}

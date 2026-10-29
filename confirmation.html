@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Merci · Nom de la boutique</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" href="fonts/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="flex min-h-dvh flex-col bg-white" x-data="confirmation">
+  <header class="relative flex h-16 items-center justify-center px-14 lg:h-20">
+    <a href="index.html" class="absolute top-1/2 left-1 grid size-11 -translate-y-1/2 place-items-center md:left-3" aria-label="Retour à l’étal">
+      <svg class="trait size-5" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+    </a>
+    <a href="index.html" class="marque" :class="$store.vue.nom === 'pastel' && 'marque--serif'" x-text="$store.boutique.nom">Nom de la boutique</a>
+  </header>
+
+  <main class="flex-1 px-4 pt-4 pb-16">
+    <div class="mx-auto max-w-[560px]">
+      <div class="flex flex-col items-center text-center">
+        <span class="grid size-14 place-items-center rounded-full bg-encre text-white">
+          <svg class="trait size-6" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+        </span>
+        <h1 class="titre-main mt-4 text-4xl md:text-5xl" x-text="'Merci, ' + prenom + '&nbsp;!'"></h1>
+        <p class="etiquette etiquette--libre mt-3 text-lg" style="--incl: 1.5deg"><span class="etiquette-papier" x-text="'Commande N°&nbsp;' + c.numero"></span></p>
+        <p class="mt-5 max-w-[420px] text-encre-douce" x-text="intro"></p>
+      </div>
+
+      <section class="mt-10" aria-labelledby="ensuite">
+        <h2 id="ensuite" class="titre-main text-2xl">Et maintenant&nbsp;?</h2>
+        <ol class="mt-3">
+          <template x-for="(e, i) in etapes" :key="e.titre">
+            <li class="flex gap-4 border-b border-trait py-4 last-of-type:border-0">
+              <span class="grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-encre text-xs font-bold"
+                :class="i === 0 ? 'bg-encre text-white' : ''" x-text="i + 1"></span>
+              <div>
+                <p class="text-sm font-semibold" x-text="e.titre"></p>
+                <p class="mt-0.5 text-sm text-encre-douce" x-text="e.texte"></p>
+              </div>
+            </li>
+          </template>
+        </ol>
+      </section>
+
+      <section class="mt-8" aria-labelledby="recap">
+        <h2 id="recap" class="titre-main text-2xl">Ta commande</h2>
+        <div class="mt-4 rounded-3xl bg-fond-doux p-5">
+          <ul>
+            <template x-for="a in c.articles" :key="a.nom + a.detail">
+              <li class="flex items-center gap-4 border-b border-trait py-3 first-of-type:pt-0">
+                <span class="grid size-14 shrink-0 place-items-center rounded-xl bg-white p-1.5"><img :src="a.image" alt="" class="size-full object-contain"></span>
+                <span class="min-w-0 flex-1">
+                  <span class="block text-sm font-semibold" x-text="a.nom"></span>
+                  <span class="block text-xs text-encre-douce" x-text="a.detail + (a.qte > 1 ? ' · ×' + a.qte : '')"></span>
+                </span>
+                <span class="text-sm font-semibold whitespace-nowrap" x-text="$fcfa(a.prix * a.qte)"></span>
+              </li>
+            </template>
+          </ul>
+          <div class="grid gap-5 border-b border-trait py-4 text-sm sm:grid-cols-2">
+            <div>
+              <p class="intitule">Livraison</p>
+              <p x-text="livraison"></p>
+              <p class="mt-1 text-encre-douce" x-text="adresse"></p>
+            </div>
+            <div>
+              <p class="intitule">Paiement</p>
+              <p x-text="c.paiement.libelle"></p>
+              <p class="mt-1 text-encre-douce" x-text="reglement"></p>
+            </div>
+          </div>
+          <p class="flex items-center justify-between pt-4" x-show="c.remise">
+            <span class="text-sm text-encre-douce">Offre de lot</span>
+            <span class="text-sm" x-text="'−' + $fcfa(c.remise)"></span>
+          </p>
+          <p class="flex items-center justify-between pt-4">
+            <span class="text-xs font-bold tracking-[0.08em] uppercase">Total</span>
+            <span class="font-main text-2xl" x-text="$fcfa(c.total)"></span>
+          </p>
+        </div>
+      </section>
+
+      <div class="mt-8 grid gap-3">
+        <a href="suivi.html" class="bouton-sombre">Suivre ma commande</a>
+        <a href="index.html" class="bouton-contour">Retourner fouiller l’étal</a>
+      </div>
+
+      <p class="mt-8 rounded-2xl border border-dashed border-trait p-5 text-sm">
+        <strong>Garde ton numéro de commande.</strong>
+        Avec ton téléphone, il suffit pour suivre ton colis&nbsp;: pas de compte, pas de mot de passe.
+      </p>
+
+      <p class="mt-8 text-center text-sm text-encre-douce">
+        Une question&nbsp;? Écris-nous sur <a :href="whatsapp" class="underline underline-offset-2">WhatsApp</a> avec ton numéro de commande.
+      </p>
+    </div>
+  </main>
+
+  <footer class="pied" id="pied"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="vendor/alpine.min.js" defer></script>
+</body>
+</html>

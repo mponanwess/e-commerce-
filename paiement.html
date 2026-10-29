@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Paiement · Nom de la boutique</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" href="fonts/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="flex min-h-dvh flex-col bg-white" x-data="paiement">
+  <header class="relative flex h-16 items-center justify-center px-14 lg:h-20">
+    <a href="index.html" class="absolute top-1/2 left-1 grid size-11 -translate-y-1/2 place-items-center md:left-3" aria-label="Retour à l’étal">
+      <svg class="trait size-5" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+    </a>
+    <a href="index.html" class="marque" :class="$store.vue.nom === 'pastel' && 'marque--serif'" x-text="$store.boutique.nom">Nom de la boutique</a>
+    <p class="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-1.5 text-[11px] font-semibold tracking-[0.08em] text-encre-douce uppercase md:right-6">
+      <svg class="trait size-4" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      <span class="sr-only md:not-sr-only">Paiement sécurisé</span>
+    </p>
+  </header>
+
+  <main class="flex-1 px-4 pt-2 pb-16 md:px-6">
+    <div class="py-20 text-center" x-show="!$store.panier.nombre" x-cloak>
+      <p class="mot">Ton panier est vide.</p>
+      <p class="mt-3 text-encre-douce">Choisis d’abord une pièce sur l’étal.</p>
+      <a href="index.html" class="mt-4 inline-flex h-11 items-center font-semibold underline underline-offset-4">Retourner fouiller l’étal</a>
+    </div>
+
+    <div class="mx-auto grid max-w-[1040px] gap-8 md:grid-cols-[minmax(0,1fr)_300px] lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-14" x-show="$store.panier.nombre" x-cloak>
+      <!-- Sur mobile, le panier se replie au-dessus du formulaire. -->
+      <button type="button" class="encart flex items-center justify-between md:hidden" :aria-expanded="String(resume)" aria-controls="resume" @click="resume = !resume">
+        <span class="flex items-center gap-2 font-semibold">
+          Voir le panier
+          <svg class="trait size-4 transition-transform" :class="resume && 'rotate-180'" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </span>
+        <span class="font-main text-xl" x-text="$fcfa(total)"></span>
+      </button>
+
+      <aside id="resume" class="md:col-start-2 md:row-start-1 md:block!" x-show="resume">
+        <div class="md:sticky md:top-6">
+          <h2 class="intitule" x-text="'Ton panier · ' + $store.panier.nombre + ($store.panier.nombre > 1 ? ' pièces' : ' pièce')"></h2>
+          <ul>
+            <template x-for="a in $store.panier.articles" :key="a.cle">
+              <li class="flex items-center gap-3 border-b border-trait py-3">
+                <span class="relative grid size-12 shrink-0 place-items-center rounded-xl border border-trait bg-white p-1">
+                  <img :src="a.image" alt="" class="size-full object-contain">
+                  <span class="absolute -top-1.5 -right-1.5 grid size-5 place-items-center rounded-full bg-encre text-[10px] font-bold text-white" x-text="a.qte"></span>
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="block text-sm font-semibold" x-text="a.nom"></span>
+                  <span class="block text-xs text-encre-douce" x-text="a.detail"></span>
+                </span>
+                <span class="text-sm font-semibold whitespace-nowrap" x-text="$fcfa(a.prix * a.qte)"></span>
+              </li>
+            </template>
+          </ul>
+          <dl class="grid grid-cols-[1fr_auto] gap-y-1.5 border-b border-trait py-3 text-sm text-encre-douce">
+            <dt>Sous-total</dt>
+            <dd class="text-right" x-text="$fcfa($store.panier.sousTotal)"></dd>
+            <template x-if="$store.panier.remise">
+              <div class="contents"><dt>Offre de lot</dt><dd class="text-right" x-text="'−' + $fcfa($store.panier.remise)"></dd></div>
+            </template>
+            <dt>Livraison</dt>
+            <dd class="text-right" x-text="mode.prix ? $fcfa(mode.prix) : 'Gratuit'"></dd>
+          </dl>
+          <div class="flex items-center justify-between py-4">
+            <span class="text-xs font-bold tracking-[0.08em] uppercase">Total</span>
+            <span class="etiquette etiquette--libre text-xl" style="--incl: -2deg"><span class="etiquette-papier" x-text="$fcfa(total)"></span></span>
+          </div>
+          <p class="flex items-center gap-2 rounded-full bg-fond-doux px-4 py-3 text-[13px]" aria-live="off">
+            <svg class="trait size-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+            <span x-show="reste">Pièces uniques&nbsp;: on te les garde encore <strong class="font-main text-sm" x-text="chrono"></strong></span>
+            <span x-show="!reste" x-cloak>Le délai est passé&nbsp;: vérifie que tes pièces sont toujours là.</span>
+          </p>
+        </div>
+      </aside>
+
+      <form class="md:col-start-1 md:row-start-1" novalidate @submit.prevent="valider()">
+        <section aria-labelledby="s-toi">
+          <h2 id="s-toi" class="flex items-baseline gap-2.5"><span class="text-xs font-semibold">1</span><span class="titre-main text-[26px]">Toi</span></h2>
+          <div class="mt-3 grid gap-4">
+            <div>
+              <label for="nom" class="intitule">Nom complet</label>
+              <input id="nom" class="champ" autocomplete="name" placeholder="Ex. Aïcha Mbarga" x-model="nom" @input="erreurs.nom = ''"
+                :aria-invalid="erreurs.nom ? 'true' : null" aria-describedby="nom-erreur">
+              <p id="nom-erreur" class="erreur" x-show="erreurs.nom" x-text="erreurs.nom"></p>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label for="tel" class="intitule">Téléphone</label>
+                <div class="relative">
+                  <span class="pointer-events-none absolute top-1/2 left-[18px] -translate-y-1/2 font-semibold">+237</span>
+                  <input id="tel" type="tel" inputmode="tel" autocomplete="tel-national" class="champ pl-[66px]" placeholder="6XX XX XX XX"
+                    x-model="tel" @input="erreurs.tel = ''" :aria-invalid="erreurs.tel ? 'true' : null" aria-describedby="tel-erreur">
+                </div>
+                <p id="tel-erreur" class="erreur" x-show="erreurs.tel" x-text="erreurs.tel"></p>
+              </div>
+              <div>
+                <label for="email" class="intitule">E-mail <span class="font-normal tracking-normal normal-case">(facultatif, pour le reçu)</span></label>
+                <input id="email" type="email" class="champ" autocomplete="email" placeholder="toi@exemple.com"
+                  x-model="email" @input="erreurs.email = ''" :aria-invalid="erreurs.email ? 'true' : null" aria-describedby="email-erreur">
+                <p id="email-erreur" class="erreur" x-show="erreurs.email" x-text="erreurs.email"></p>
+              </div>
+            </div>
+            <label class="flex min-h-11 items-center gap-3 text-sm">
+              <input type="checkbox" class="size-5 accent-encre" x-model="whatsapp">
+              Me tenir au courant sur WhatsApp
+            </label>
+          </div>
+        </section>
+
+        <section class="mt-10" aria-labelledby="s-livraison">
+          <h2 id="s-livraison" class="flex items-baseline gap-2.5"><span class="text-xs font-semibold">2</span><span class="titre-main text-[26px]">Livraison</span></h2>
+          <fieldset class="mt-3 grid gap-2.5">
+            <legend class="sr-only">Mode de livraison</legend>
+            <template x-for="l in livraisons" :key="l.code">
+              <label class="choix">
+                <input type="radio" class="radio" name="livraison" :value="l.code" x-model="livraison">
+                <span class="min-w-0 flex-1">
+                  <span class="block font-semibold" x-text="l.libelle"></span>
+                  <span class="block text-[13px] text-encre-douce" x-text="l.detail"></span>
+                </span>
+                <span class="text-sm font-semibold whitespace-nowrap" x-text="l.prix ? $fcfa(l.prix) : 'Gratuit'"></span>
+              </label>
+            </template>
+          </fieldset>
+
+          <div class="encart mt-3 grid gap-4" x-show="mode.type === 'domicile'">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label for="quartier" class="intitule">Quartier</label>
+                <input id="quartier" class="champ" placeholder="Ex. Bonapriso" x-model="quartier" @input="erreurs.quartier = ''"
+                  :aria-invalid="erreurs.quartier ? 'true' : null" aria-describedby="quartier-erreur">
+                <p id="quartier-erreur" class="erreur" x-show="erreurs.quartier" x-text="erreurs.quartier"></p>
+              </div>
+              <div>
+                <label for="rue" class="intitule">Rue <span class="font-normal tracking-normal normal-case">(si tu la connais)</span></label>
+                <input id="rue" class="champ" placeholder="Ex. rue Joss" x-model="rue">
+              </div>
+            </div>
+            <div>
+              <label for="repere" class="intitule">Repère</label>
+              <input id="repere" class="champ" placeholder="Ex. portail bleu face à la pharmacie" x-model="repere" @input="erreurs.repere = ''"
+                :aria-invalid="erreurs.repere ? 'true' : null" aria-describedby="repere-erreur repere-aide">
+              <p id="repere-erreur" class="erreur" x-show="erreurs.repere" x-text="erreurs.repere"></p>
+            </div>
+            <p id="repere-aide" class="text-[13px] text-encre-douce">Le livreur t’appelle avant de passer. Un bon repère, c’est une livraison du premier coup.</p>
+          </div>
+
+          <div class="encart mt-3 text-sm" x-show="mode.type === 'atelier'" x-cloak>
+            <p class="font-semibold" x-text="$store.boutique.atelier.nom"></p>
+            <p class="mt-1 text-encre-douce" x-text="$store.boutique.atelier.adresse + ' · ' + $store.boutique.atelier.horaires"></p>
+            <p class="mt-2 text-[13px] text-encre-douce" x-text="'On te garde tes pièces ' + $store.boutique.atelier.gardeJours + ' jours. Viens avec ton numéro de commande.'"></p>
+          </div>
+
+          <div class="encart mt-3 grid gap-4" x-show="mode.type === 'agence'" x-cloak>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label for="ville" class="intitule">Ville de retrait</label>
+                <input id="ville" class="champ" placeholder="Ex. Bafoussam" x-model="ville" @input="erreurs.ville = ''"
+                  :aria-invalid="erreurs.ville ? 'true' : null" aria-describedby="ville-erreur">
+                <p id="ville-erreur" class="erreur" x-show="erreurs.ville" x-text="erreurs.ville"></p>
+              </div>
+              <div>
+                <label for="agence" class="intitule">Agence de voyage</label>
+                <input id="agence" class="champ" placeholder="Ex. Général Express" x-model="agence" @input="erreurs.agence = ''"
+                  :aria-invalid="erreurs.agence ? 'true' : null" aria-describedby="agence-erreur">
+                <p id="agence-erreur" class="erreur" x-show="erreurs.agence" x-text="erreurs.agence"></p>
+              </div>
+            </div>
+            <p class="text-[13px] text-encre-douce">On dépose ton colis sous 48 h et on t’envoie la photo du reçu. Tu le retires avec ta pièce d’identité.</p>
+          </div>
+        </section>
+
+        <section class="mt-10" aria-labelledby="s-paiement">
+          <h2 id="s-paiement" class="flex items-baseline gap-2.5"><span class="text-xs font-semibold">3</span><span class="titre-main text-[26px]">Paiement</span></h2>
+          <fieldset class="mt-3 grid gap-2.5">
+            <legend class="sr-only">Moyen de paiement</legend>
+            <template x-for="m in paiements" :key="m.code">
+              <label class="choix">
+                <input type="radio" class="radio" name="moyen" :value="m.code" x-model="moyen" :disabled="!autorise(m)">
+                <span class="min-w-0 flex-1">
+                  <span class="block font-semibold" x-text="m.libelle"></span>
+                  <span class="block text-[13px] text-encre-douce" x-text="autorise(m) ? m.detail : 'Pas possible avec l’agence de voyage&nbsp;: le colis se paie avant le départ.'"></span>
+                </span>
+              </label>
+            </template>
+          </fieldset>
+
+          <div class="encart mt-3" x-show="moyenChoisi.mobile">
+            <label for="numero" class="intitule">Numéro <span class="block" x-text="moyenChoisi.libelle"></span></label>
+            <div class="relative">
+              <span class="pointer-events-none absolute top-1/2 left-[18px] -translate-y-1/2 font-semibold">+237</span>
+              <input id="numero" type="tel" inputmode="tel" class="champ pl-[66px]" :placeholder="tel || '6XX XX XX XX'"
+                x-model="numero" @input="erreurs.numero = ''" :aria-invalid="erreurs.numero ? 'true' : null" aria-describedby="numero-erreur numero-aide">
+            </div>
+            <p id="numero-erreur" class="erreur" x-show="erreurs.numero" x-text="erreurs.numero"></p>
+            <p id="numero-aide" class="mt-3 text-[13px] text-encre-douce">Tu vas recevoir une demande de paiement sur ce numéro. Tape ton code secret pour valider&nbsp;: on ne le voit jamais. Vide, c’est ton numéro de téléphone.</p>
+          </div>
+          <p class="encart mt-3 text-[13px] text-encre-douce" x-show="moyen === 'carte'" x-cloak>
+            Tu passes ensuite sur la page sécurisée de notre partenaire de paiement pour saisir ta carte.
+          </p>
+          <p class="encart mt-3 text-[13px] text-encre-douce" x-show="moyen === 'livraison'" x-cloak>
+            On t’appelle pour confirmer ta commande avant de l’envoyer. Tu paies en espèces ou en Mobile Money, pièces en main.
+          </p>
+        </section>
+
+        <button type="submit" class="bouton-sombre mt-8" x-text="libelleBouton"></button>
+        <p class="mt-3 text-center text-xs text-encre-douce">
+          En validant, tu acceptes les <a href="#" class="underline underline-offset-2">conditions de vente</a>.
+          Retour possible sous 14 jours&nbsp;: <a href="#" class="underline underline-offset-2">livraison &amp; retours</a>.
+        </p>
+        <p class="mt-2 text-center text-xs font-semibold">Démo&nbsp;: aucun paiement n’est fait et aucune donnée n’est envoyée.</p>
+      </form>
+    </div>
+  </main>
+
+  <footer class="pied" id="pied"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="vendor/alpine.min.js" defer></script>
+</body>
+</html>

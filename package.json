@@ -1,0 +1,22 @@
+{
+  "name": "etal-demo",
+  "version": "0.1.0",
+  "description": "Le site de démonstration de la boutique, à présenter aux partenaires",
+  "author": "mponanwess",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "vendor": "mkdir -p vendor fonts && cp node_modules/alpinejs/dist/cdn.min.js vendor/alpine.min.js && cp node_modules/@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2 fonts/archivo.woff2 && cp node_modules/@fontsource/permanent-marker/files/permanent-marker-latin-400-normal.woff2 fonts/permanent-marker.woff2 && cp node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff2 fonts/cormorant-garamond.woff2",
+    "css": "tailwindcss -i src/style.css -o css/style.css --minify",
+    "build": "npm run vendor && npm run css",
+    "watch": "tailwindcss -i src/style.css -o css/style.css --watch=always"
+  },
+  "devDependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/permanent-marker": "^5.3.0",
+    "@tailwindcss/cli": "^4.3.3",
+    "alpinejs": "^3.17.5",
+    "tailwindcss": "^4.3.3"
+  }
+}

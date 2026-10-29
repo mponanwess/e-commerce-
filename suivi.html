@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Suivi de commande · Nom de la boutique</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" href="fonts/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="flex min-h-dvh flex-col bg-white" x-data="suivi">
+  <header class="relative flex h-16 items-center justify-center px-14 lg:h-20">
+    <a href="index.html" class="absolute top-1/2 left-1 grid size-11 -translate-y-1/2 place-items-center md:left-3" aria-label="Retour à l’étal">
+      <svg class="trait size-5" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+    </a>
+    <a href="index.html" class="marque" :class="$store.vue.nom === 'pastel' && 'marque--serif'" x-text="$store.boutique.nom">Nom de la boutique</a>
+  </header>
+
+  <main class="flex-1 px-4 pt-4 pb-16 md:px-6">
+    <div class="mx-auto max-w-[1000px]">
+      <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 class="titre-main text-4xl md:text-5xl" x-text="'Commande N°&nbsp;' + c.numero"></h1>
+          <p class="mt-1 text-sm text-encre-douce" x-text="passee"></p>
+        </div>
+        <div class="md:text-right">
+          <p class="intitule" x-text="prevue.intitule"></p>
+          <p class="etiquette etiquette--libre text-xl" style="--incl: -1.5deg"><span class="etiquette-papier" x-text="prevue.texte"></span></p>
+        </div>
+      </div>
+
+      <div class="mt-10 grid gap-10 md:grid-cols-[minmax(0,1fr)_340px] md:gap-14">
+        <!-- La frise : ce qui est fait, ce qui se passe, ce qui vient. -->
+        <ol aria-label="Étapes de la commande">
+          <template x-for="(e, i) in etapes" :key="e.titre">
+            <li class="relative flex gap-4 pb-8 last-of-type:pb-0">
+              <span class="absolute top-7 bottom-0 left-[13px] w-0.5" :class="e.etat === 'fait' ? 'bg-encre' : 'bg-trait'"
+                x-show="i < etapes.length - 1" aria-hidden="true"></span>
+              <span class="relative grid size-7 shrink-0 place-items-center rounded-full"
+                :class="{ 'bg-encre text-white': e.etat === 'fait', 'border-[1.5px] border-encre bg-white': e.etat === 'encours', 'border-[1.5px] border-trait bg-white': e.etat === 'avenir' }">
+                <svg class="trait size-3.5" viewBox="0 0 24 24" aria-hidden="true" x-show="e.etat === 'fait'"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+                <span class="size-2 rounded-full bg-encre-douce" x-show="e.etat === 'encours'"></span>
+              </span>
+              <div class="min-w-0 flex-1" :class="e.etat === 'avenir' && 'text-encre-douce'">
+                <p class="flex flex-wrap items-center gap-3">
+                  <span class="font-semibold" x-text="e.titre"></span>
+                  <span class="etiquette etiquette--libre text-[11px]" style="--incl: -2deg" x-show="e.etat === 'encours'"><span class="etiquette-papier">en ce moment</span></span>
+                  <span class="sr-only" x-text="{ fait: ', fait', encours: ', en cours', avenir: ', à venir' }[e.etat]"></span>
+                </p>
+                <p class="text-xs text-encre-douce" x-show="e.quand" x-text="e.quand"></p>
+                <p class="mt-1.5 text-sm" :class="e.etat !== 'avenir' && 'text-encre-douce'" x-text="e.texte"></p>
+
+                <div class="mt-4 flex flex-wrap items-center gap-3 rounded-3xl bg-encre p-4 text-encre-claire sur-sombre" x-show="e.livreur">
+                  <span class="grid size-10 shrink-0 place-items-center rounded-full bg-sombre-survol font-main text-lg">M</span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block font-semibold">Moussa, ton livreur</span>
+                    <span class="block text-xs text-texte-panneau">Moto · il t’appelle avant de passer</span>
+                  </span>
+                  <span class="flex gap-2">
+                    <a href="#" class="flex h-11 items-center gap-2 rounded-full bg-white px-4 text-sm font-bold text-encre">
+                      <svg class="trait size-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 4h-3A1.5 1.5 0 0 0 3 5.5C3 13.5 10.5 21 18.5 21a1.5 1.5 0 0 0 1.5-1.5v-3l-4-1.5-2 2a12 12 0 0 1-6-6l2-2z"/></svg>
+                      Appeler
+                    </a>
+                    <a :href="whatsapp" class="flex h-11 items-center rounded-full border border-encre-douce px-4 text-sm font-bold">WhatsApp</a>
+                  </span>
+                </div>
+              </div>
+            </li>
+          </template>
+        </ol>
+
+        <div>
+          <div class="rounded-3xl bg-fond-doux p-5">
+            <ul>
+              <template x-for="a in c.articles" :key="a.nom + a.detail">
+                <li class="flex items-center gap-4 border-b border-trait py-3 first-of-type:pt-0">
+                  <span class="grid size-12 shrink-0 place-items-center rounded-xl bg-white p-1"><img :src="a.image" alt="" class="size-full object-contain"></span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-semibold" x-text="a.nom"></span>
+                    <span class="block text-xs text-encre-douce" x-text="a.detail + ' · ' + $fcfa(a.prix * a.qte)"></span>
+                  </span>
+                </li>
+              </template>
+            </ul>
+            <div class="grid gap-4 border-b border-trait py-4 text-sm">
+              <div>
+                <p class="intitule">Livraison à</p>
+                <p x-text="destinataire"></p>
+                <p class="mt-1 text-encre-douce" x-text="adresse"></p>
+              </div>
+              <div>
+                <p class="intitule">Paiement</p>
+                <p x-text="reglement"></p>
+              </div>
+            </div>
+            <p class="flex items-center justify-between pt-4">
+              <span class="text-xs font-bold tracking-[0.08em] uppercase">Total</span>
+              <span class="font-main text-2xl" x-text="$fcfa(c.total)"></span>
+            </p>
+          </div>
+
+          <nav class="mt-4" aria-label="Autour de ta commande">
+            <a href="#" class="flex min-h-12 items-center justify-between border-b border-trait text-sm font-semibold">Changer le repère de livraison<svg class="trait size-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+            <a href="#" class="flex min-h-12 items-center justify-between border-b border-trait text-sm font-semibold">Comment se passent les retours<svg class="trait size-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+            <a :href="whatsapp" class="flex min-h-12 items-center justify-between border-b border-trait text-sm font-semibold">Une question&nbsp;? WhatsApp<svg class="trait size-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+            <a href="index.html#suivre" class="flex min-h-12 items-center justify-between border-b border-trait text-sm font-semibold">Suivre une autre commande<svg class="trait size-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="pied" id="pied"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="vendor/alpine.min.js" defer></script>
+</body>
+</html>

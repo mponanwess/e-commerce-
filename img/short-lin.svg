@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>
+    <pattern id="t" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0 3H6" stroke="#a88f68" stroke-opacity=".18"/></pattern>
+    <path id="f" d="M112 66H288L302 316 206 324 200 176 194 324 98 316Z"/>
+  </defs>
+  <use href="#f" fill="#d3bf9d"/>
+  <use href="#f" fill="url(#t)"/>
+  <path d="M112 66H288L290 100H110Z" fill="#c2ab86"/>
+  <path d="M130 70V96M150 70V96M170 70V96M230 70V96M250 70V96M270 70V96" stroke="#a88f68" stroke-opacity=".5" stroke-width="2"/>
+  <path d="M192 96C186 124 180 144 186 168M208 96C214 122 222 142 214 166" fill="none" stroke="#f3ead9" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M128 106 150 156M272 106 250 156M200 104V176M104 296 194 304M296 296 206 304" fill="none" stroke="#8c7350" stroke-opacity=".4" stroke-width="2.5"/>
+  <use href="#f" fill="url(#l)"/>
+</svg>

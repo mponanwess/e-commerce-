@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>
+    <pattern id="r" width="6" height="10" patternUnits="userSpaceOnUse"><path d="M3 0V10" stroke="#0c1736" stroke-opacity=".45" stroke-width="2"/></pattern>
+    <path id="f" d="M168 58C178 80 222 80 232 58L284 74C318 86 332 140 344 300L308 308 294 154 292 342H108L106 154 92 308 56 300C68 140 82 86 116 74Z"/>
+  </defs>
+  <use href="#f" fill="#1b2c57"/>
+  <path d="M168 58C178 80 222 80 232 58" fill="none" stroke="#132247" stroke-width="12"/>
+  <path d="M108 322H292V342H108ZM56 300 92 308 94 288 59 280ZM344 300 308 308 306 288 341 280Z" fill="#15244a"/>
+  <path d="M108 322H292V342H108ZM56 300 92 308 94 288 59 280ZM344 300 308 308 306 288 341 280Z" fill="url(#r)"/>
+  <path d="M116 74C112 110 108 130 106 154M284 74C288 110 292 130 294 154" fill="none" stroke="#0c1736" stroke-opacity=".4" stroke-width="2"/>
+  <use href="#f" fill="url(#l)"/>
+</svg>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Une démo pour les partenaires : elle n’a rien à faire dans les moteurs de recherche. -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>Nom de la boutique</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" href="fonts/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="flex min-h-dvh flex-col" x-data="etal" :class="vue === 'pastel' ? 'bg-creme' : 'bg-white'">
+  <header class="flex h-16 items-center justify-center px-14 lg:h-20">
+    <h1><a href="index.html" class="marque" :class="vue === 'pastel' && 'marque--serif'" x-text="$store.boutique.nom">Nom de la boutique</a></h1>
+  </header>
+
+  <main class="flex-1">
+    <!-- Une recherche, un rayon ou les nouveautés : un titre écrit à la main, puis la mosaïque. -->
+    <template x-if="titre">
+      <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 pt-2 pb-6 md:px-6 lg:px-10">
+        <h2 class="titre-main text-4xl lg:text-5xl" x-text="titre"></h2>
+        <p class="text-encre-douce md:text-lg" x-text="sousTitre"></p>
+        <a href="index.html" class="ml-auto inline-flex h-11 items-center text-sm font-semibold underline underline-offset-4">Tout voir</a>
+      </div>
+    </template>
+
+    <p class="px-4 pb-16 text-encre-douce md:px-6 lg:px-10" x-show="titre && !pieces.length" x-cloak>
+      Rien sur l’étal pour l’instant. Essaie «&nbsp;wax&nbsp;», «&nbsp;jean&nbsp;» ou «&nbsp;baskets&nbsp;».
+    </p>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+      :class="vue === 'pastel' ? 'etal--pastel gap-2.5 px-2.5 pb-10 lg:gap-3 lg:px-8' : 'etal--blanc gap-x-1 gap-y-6 px-2 pb-10 md:gap-y-8 lg:px-4'">
+      <template x-for="(p, i) in pieces" :key="p.slug">
+        <a class="case" :href="lien(p)" @click="voir($event, p)" :style="{ '--case': teinte(i) }">
+          <div class="case-image">
+            <img class="article" :src="p.image" alt="" width="400" height="400" :loading="i < 8 ? 'eager' : 'lazy'">
+            <span class="etiquette etiquette--case" :class="'place-' + p.etiquette.place + (i % 2 ? ' etiquette--b' : '')" :style="{ '--incl': p.etiquette.incl + 'deg' }">
+              <span class="etiquette-papier">
+                <s class="etiquette-avant" x-show="p.avant" x-text="p.avant && $fcfa(p.avant)"></s><span x-text="prix(p)"></span>
+                <span class="etiquette-mot" x-show="p.mot" x-text="p.mot"></span>
+              </span>
+            </span>
+          </div>
+          <p class="case-libelle">
+            <span x-text="p.nom"></span><span class="font-normal tracking-normal text-encre-douce normal-case" x-show="p.variantes" x-text="' · ' + p.variantes?.length + ' coloris'"></span>
+          </p>
+          <p class="case-numero" x-text="'N°&nbsp;' + p.numero"></p>
+        </a>
+      </template>
+    </div>
+
+    <!-- La vue intermédiaire : les coloris d’un même modèle, côte à côte comme sur l’étal. -->
+    <div class="fixed inset-0 z-50 flex items-end justify-center md:items-center" x-show="ouverte" x-cloak x-transition.opacity.duration.200ms
+      @keydown.escape.window="fermerVariantes()">
+      <div class="voile" @click="fermerVariantes()"></div>
+      <section class="relative w-full max-w-[880px] rounded-t-3xl p-5 pb-8 shadow-[0_14px_40px_rgb(0_0_0/0.25)] md:m-6 md:rounded-3xl md:p-8"
+        :class="vue === 'pastel' ? 'bg-creme' : 'bg-white'" role="dialog" aria-modal="true" aria-labelledby="variantes-titre">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h2 id="variantes-titre" class="titre-main text-3xl" x-text="ouverte?.nom"></h2>
+            <p class="mt-1 text-encre-douce" x-text="ouverte && ouverte.variantes.length + ' coloris&nbsp;: choisis le tien.'"></p>
+          </div>
+          <button type="button" class="-mt-1 -mr-2 grid size-11 shrink-0 place-items-center rounded-full hover:bg-encre/8" x-ref="fermer" aria-label="Fermer" @click="fermerVariantes()">
+            <svg class="trait size-6" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+        <div class="mt-5 grid grid-cols-3 gap-2 md:gap-4" :class="vue === 'pastel' ? 'etal--pastel' : 'etal--blanc'">
+          <template x-for="(v, j) in ouverte?.variantes ?? []" :key="v.couleur">
+            <a class="case" :href="lien(ouverte, v)" :style="{ '--case': 'var(--color-' + ['lin', 'argile', 'sauge'][j % 3] + ')' }">
+              <div class="case-image">
+                <img class="article" :src="v.image" alt="" width="400" height="400">
+                <span class="etiquette etiquette--case place-hg" :class="j % 2 && 'etiquette--b'" :style="{ '--incl': (j % 2 ? 3 : -2) + 'deg' }">
+                  <span class="etiquette-papier" x-text="prix(ouverte)"></span>
+                </span>
+              </div>
+              <p class="case-libelle" x-text="v.nom"></p>
+            </a>
+          </template>
+        </div>
+      </section>
+    </div>
+
+    <div class="pastille-ancre" id="pastille"></div>
+  </main>
+
+  <footer class="pied" id="pied"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="vendor/alpine.min.js" defer></script>
+</body>
+</html>
