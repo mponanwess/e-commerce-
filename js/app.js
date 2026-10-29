@@ -30,8 +30,11 @@
 
   pieces.forEach((p, i) => {
     p.numero = String(i + 1).padStart(2, '0');
-    // Un modèle en plusieurs coloris se montre sous son premier coloris.
-    p.image ??= p.variantes?.[0].image;
+    // La première photo est celle de l’étal ; un modèle en plusieurs coloris
+    // se montre sous son premier coloris.
+    p.variantes?.forEach((v) => (v.image = v.photos[0]));
+    p.photos ??= p.variantes[0].photos;
+    p.image = p.photos[0];
     p.tailles ??= p.variantes?.[0].tailles;
   });
 
@@ -40,9 +43,11 @@
   // Un coloris prend la photo et les tailles du modèle choisi.
   const decliner = (p, couleur) => {
     const v = p.variantes?.find((x) => x.couleur === couleur) ?? p.variantes?.[0];
-    return v ? { ...p, image: v.image, tailles: v.tailles, coloris: v } : p;
+    return v ? { ...p, image: v.image, photos: v.photos, tailles: v.tailles, coloris: v } : p;
   };
   const lienPiece = (p, couleur) => `produit.html?p=${p.slug}${couleur ? `&c=${couleur}` : ''}`;
+  // Un modèle en plusieurs coloris mène d’abord à ses coloris, côte à côte.
+  const lienCase = (p) => (p.coloris ? lienPiece(p, p.coloris.couleur) : p.variantes ? `index.html?modele=${p.slug}` : lienPiece(p));
   const prixEtiquette = (p) => (p.lot ? `${p.lot.quantite} pour ${fcfa(p.lot.prix)}` : fcfa(p.prix));
   // Les chaussures se mesurent en pointure, le reste en taille.
   const mesure = (p, t) => (t === 'TU' ? 'Taille unique' : `${p.rayon === 'chaussures' ? 'Pointure' : 'Taille'} ${t}`);
@@ -140,7 +145,11 @@
     remise: 0,
     total: 28000,
   });
-  const commande = () => lire('etal:commande', null) ?? exemple();
+  const commande = () => {
+    const c = lire('etal:commande', null) ?? exemple();
+    c.articles = c.articles.filter((a) => trouver(a.slug)).map((a) => ({ ...a, image: article(a).image }));
+    return c;
+  };
 
   const adresseDe = (c) => {
     const l = c.livraison;
@@ -332,6 +341,15 @@
   document.getElementById('pastille')?.insertAdjacentHTML('beforeend', pastille);
   document.getElementById('pied')?.insertAdjacentHTML('beforeend', pied);
 
+  // Un chevron de retour revient à la page d’avant quand elle est de ce site
+  // (les coloris, un rayon), sinon il suit son lien.
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-retour]') && document.referrer.startsWith(location.origin) && history.length > 1) {
+      e.preventDefault();
+      history.back();
+    }
+  });
+
   // Le bouton qui a ouvert le panneau, pour y ramener le clavier à la fermeture.
   let ouvreur = null;
 
@@ -478,11 +496,13 @@
       },
     }));
 
-    /* L’étal, en trois modes :
+    /* L’étal, en quatre modes :
        - accueil : toute la mosaïque, sans en-tête ;
        - recherche (?q=wax) : le champ, les rayons trouvés et le tri ;
        - rayon (?rayon=hauts, ?rayon=tout, ?nouveautes=1) : le titre, Pour qui,
-         les onglets des rayons, les filtres et le tri. */
+         les onglets des rayons, les filtres et le tri ;
+       - modele (?modele=tshirt-delave) : la vue intermédiaire, les coloris
+         d’un modèle sur la même mosaïque, une case chacun. */
     Alpine.data('etal', () => ({
       mode: 'accueil',
       q: '',
@@ -493,8 +513,7 @@
       parmi: '',
       tri: 'pertinence',
       cols: 2,
-      ouverte: null,
-      retour: null,
+      modele: null,
       tranches: TRANCHES,
       publics: [
         { code: '', nom: 'Tout' },
@@ -503,7 +522,11 @@
       ],
       init() {
         const u = new URLSearchParams(location.search);
-        if (u.has('q')) {
+        const modele = trouver(u.get('modele'));
+        if (modele?.variantes) {
+          this.mode = 'modele';
+          this.modele = modele;
+        } else if (u.has('q')) {
           this.mode = 'recherche';
           this.q = u.get('q').trim();
         } else if (u.has('rayon') || u.has('nouveautes')) {
@@ -548,6 +571,14 @@
         );
       },
       get pieces() {
+        if (this.mode === 'modele') {
+          // Chaque coloris dans sa case ; les étiquettes changent de coin d’une case à l’autre.
+          return this.modele.variantes.map((v, i) => ({
+            ...decliner(this.modele, v.couleur),
+            cle: v.couleur,
+            etiquette: { place: ['hg', 'hd'][i % 2], incl: [-2, 3, -3][i % 3] },
+          }));
+        }
         const f = this.$store.filtres;
         const tranche = TRANCHES.find((t) => t.code === f.prix);
         const liste = this.trouvees.filter(
@@ -615,23 +646,8 @@
       teinte(i) {
         return `var(--color-${this.teintes[i]})`;
       },
-      lien(p, v) {
-        return lienPiece(p, v?.couleur);
-      },
+      lien: lienCase,
       prixEtiquette,
-      // Un modèle en plusieurs coloris ouvre d’abord la vue intermédiaire.
-      voir(e, p) {
-        if (!p.variantes) return;
-        e.preventDefault();
-        this.ouverte = p;
-        this.retour = e.currentTarget;
-        this.$nextTick(() => this.$refs.fermer.focus());
-      },
-      fermerVariantes() {
-        if (!this.ouverte) return;
-        this.ouverte = null;
-        this.retour?.focus();
-      },
     }));
 
     Alpine.data('fiche', () => ({
@@ -643,6 +659,8 @@
       message: '',
       ton: 'succes',
       minuteur: null,
+      photo: 0,
+      depart: null,
       init() {
         const u = new URLSearchParams(location.search);
         this.base = trouver(u.get('p')) ?? null;
@@ -663,9 +681,23 @@
           ['Entretien', i.entretien],
         ];
       },
-      voisine(pas) {
-        const i = pieces.findIndex((p) => p.slug === this.base.slug);
-        return lienPiece(pieces[(i + pas + pieces.length) % pieces.length]);
+      // Le carrousel tourne en boucle : après la dernière photo, la première.
+      defiler(pas) {
+        const n = this.piece.photos.length;
+        this.photo = (this.photo + pas + n) % n;
+      },
+      // Sur un écran tactile, un glissement du doigt fait défiler aussi.
+      toucher(e) {
+        this.depart = e.changedTouches[0].clientX;
+      },
+      lacher(e) {
+        const dx = e.changedTouches[0].clientX - (this.depart ?? e.changedTouches[0].clientX);
+        if (Math.abs(dx) > 40) this.defiler(dx < 0 ? 1 : -1);
+        this.depart = null;
+      },
+      get altPhoto() {
+        const sujet = [this.piece.nom, this.piece.coloris?.nom.toLowerCase()].filter(Boolean).join(' ');
+        return `${sujet}, photo ${this.photo + 1} sur ${this.piece.photos.length}`;
       },
       lien(v) {
         return lienPiece(this.base, v.couleur);

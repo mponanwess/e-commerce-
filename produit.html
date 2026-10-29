@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
   <meta name="robots" content="noindex, nofollow">
   <title>Nom de la boutique</title>
   <link rel="icon" href="data:,">
@@ -12,7 +13,7 @@
 <body class="flex min-h-dvh flex-col" x-data="fiche">
   <header class="site bords-surs">
     <div class="relative flex h-16 items-center justify-center px-14 lg:h-20">
-    <a href="index.html" class="absolute top-1/2 left-1 grid size-11 -translate-y-1/2 place-items-center md:left-3" aria-label="Retour à l’étal">
+    <a href="index.html" data-retour class="absolute top-1/2 left-1 grid size-11 -translate-y-1/2 place-items-center md:left-3" aria-label="Retour">
       <svg class="trait size-5" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
     </a>
     <a href="index.html" class="marque" :class="$store.vue.nom === 'pastel' && 'marque--serif'" x-text="$store.boutique.nom">Nom de la boutique</a>
@@ -30,13 +31,16 @@
 
     <template x-if="piece">
       <article class="mx-auto flex max-w-[1100px] flex-col items-center pt-2 pb-32 md:px-6">
-        <div class="grid w-full grid-cols-[44px_1fr_44px] items-center md:grid-cols-[48px_1fr_48px]">
-          <a :href="voisine(-1)" class="grid size-11 place-items-center md:size-12" aria-label="Pièce précédente">
+        <!-- Le carrousel : les chevrons, les flèches du clavier ou le doigt font défiler les photos. -->
+        <div class="grid w-full grid-cols-[44px_1fr_44px] items-center md:grid-cols-[48px_1fr_48px]"
+          role="region" aria-roledescription="carrousel" aria-label="Photos"
+          @keydown.left="defiler(-1)" @keydown.right="defiler(1)">
+          <button type="button" class="grid size-11 place-items-center md:size-12" aria-label="Photo précédente" x-show="piece.photos.length > 1" @click="defiler(-1)">
             <svg class="trait size-7" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
-          </a>
+          </button>
 
-          <div class="fiche-image">
-            <img class="article" :src="piece.image" :alt="piece.nom + ', posée à plat'" width="400" height="400">
+          <div class="fiche-image col-start-2" @touchstart.passive="toucher($event)" @touchend="lacher($event)">
+            <img class="article" :class="photo && 'est-detail'" :src="piece.photos[photo]" :alt="altPhoto" width="640" height="640">
             <button type="button" class="bouton-infos" :aria-expanded="String(infos)" aria-controls="infos" @click="infos = !infos">
               <span x-text="infos ? 'Moins d’infos' : 'Plus d’infos'"></span>
               <svg class="trait size-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14" x-show="!infos"/></svg>
@@ -53,12 +57,18 @@
             </div>
           </div>
 
-          <a :href="voisine(1)" class="grid size-11 place-items-center justify-self-end md:size-12" aria-label="Pièce suivante">
+          <button type="button" class="grid size-11 place-items-center justify-self-end md:size-12" aria-label="Photo suivante" x-show="piece.photos.length > 1" @click="defiler(1)">
             <svg class="trait size-7" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-          </a>
+          </button>
         </div>
 
-        <h1 class="nom-produit mt-7 px-4 text-center" x-text="piece.nom"></h1>
+        <div class="points mt-4" aria-hidden="true" x-show="piece.photos.length > 1">
+          <template x-for="(_, i) in piece.photos" :key="i">
+            <span :class="i === photo && 'est-vue'"></span>
+          </template>
+        </div>
+
+        <h1 class="nom-produit mt-3 px-4 text-center" x-text="piece.nom"></h1>
 
         <p class="etiquette etiquette--libre mt-3 text-[28px]" style="--incl: -2deg">
           <span class="etiquette-papier">

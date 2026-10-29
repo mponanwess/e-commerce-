@@ -11,8 +11,10 @@
    - arrive : la date d’arrivée, pour le tri « Nouveautés » ; nouveau : la
      pièce figure dans les Nouveautés.
    - tailles : stock par taille ; 0 = épuisée, barrée sur la fiche.
-   - variantes : les coloris d’un même modèle, montrés côte à côte avant la
-     fiche ; chacun a sa photo et ses tailles. */
+   - photos : la première est posée sur l’étal ; sur la fiche, les chevrons
+     les font toutes défiler (de face, de dos, détails…).
+   - variantes : les coloris d’un même modèle, montrés côte à côte sur une
+     page à part avant la fiche ; chacun a ses photos et ses tailles. */
 
 window.ETAL = {
   boutique: {
@@ -55,7 +57,7 @@ window.ETAL = {
       public: 'homme',
       prix: 10000,
       nouveau: true,
-      image: 'img/chemise-wax.webp',
+      photos: ['img/chemise-wax.webp', 'img/chemise-wax-detail.webp'],
       etiquette: { place: 'hd', incl: -3 },
       tailles: [
         { t: 'XS', stock: 0 },
@@ -87,19 +89,19 @@ window.ETAL = {
         {
           couleur: 'blanc',
           nom: 'Blanc',
-          image: 'img/tshirt-blanc.webp',
+          photos: ['img/tshirt-blanc.webp', 'img/tshirt-blanc-detail.webp'],
           tailles: [{ t: 'S', stock: 1 }, { t: 'M', stock: 1 }, { t: 'L', stock: 0 }],
         },
         {
           couleur: 'noir',
           nom: 'Noir',
-          image: 'img/tshirt-noir.webp',
+          photos: ['img/tshirt-noir.webp', 'img/tshirt-noir-detail.webp'],
           tailles: [{ t: 'S', stock: 0 }, { t: 'M', stock: 1 }, { t: 'L', stock: 1 }],
         },
         {
           couleur: 'ocre',
           nom: 'Ocre',
-          image: 'img/tshirt-ocre.webp',
+          photos: ['img/tshirt-ocre.webp', 'img/tshirt-ocre-detail.webp'],
           tailles: [{ t: 'S', stock: 1 }, { t: 'M', stock: 1 }, { t: 'L', stock: 1 }],
         },
       ],
@@ -119,7 +121,7 @@ window.ETAL = {
       rayon: 'bas',
       public: 'homme',
       prix: 4000,
-      image: 'img/short-lin.webp',
+      photos: ['img/short-lin.webp', 'img/short-lin-detail.webp'],
       etiquette: { place: 'hd', incl: -2 },
       tailles: [{ t: 'M', stock: 1 }],
       infos: {
@@ -139,7 +141,7 @@ window.ETAL = {
       public: 'mixte',
       prix: 9000,
       avant: 12000,
-      image: 'img/jean-brut.webp',
+      photos: ['img/jean-brut.webp', 'img/jean-brut-detail.webp'],
       etiquette: { place: 'hg', incl: 3 },
       tailles: [{ t: '32', stock: 1 }],
       infos: {
@@ -158,7 +160,7 @@ window.ETAL = {
       rayon: 'accessoires',
       public: 'mixte',
       prix: 3500,
-      image: 'img/casquette.webp',
+      photos: ['img/casquette.webp', 'img/casquette-detail.webp'],
       etiquette: { place: 'bd', incl: -2 },
       tailles: [{ t: 'TU', stock: 1 }],
       infos: {
@@ -177,7 +179,7 @@ window.ETAL = {
       rayon: 'accessoires',
       public: 'femme',
       prix: 6500,
-      image: 'img/cabas-tresse.webp',
+      photos: ['img/cabas-tresse.webp', 'img/cabas-tresse-detail.webp'],
       etiquette: { place: 'hd', incl: 3 },
       tailles: [{ t: 'TU', stock: 1 }],
       infos: {
@@ -198,7 +200,7 @@ window.ETAL = {
       prix: 16500,
       mot: 'dernière paire',
       nouveau: true,
-      image: 'img/baskets.webp',
+      photos: ['img/baskets.webp', 'img/baskets-detail.webp'],
       etiquette: { place: 'hg', incl: -3 },
       tailles: [{ t: '42', stock: 1 }],
       infos: {
@@ -219,7 +221,7 @@ window.ETAL = {
       prix: 12500,
       avant: 16000,
       nouveau: true,
-      image: 'img/robe-imprimee.webp',
+      photos: ['img/robe-imprimee.webp', 'img/robe-imprimee-detail.webp'],
       etiquette: { place: 'md', incl: -2 },
       tailles: [{ t: 'S', stock: 1 }, { t: 'M', stock: 1 }],
       infos: {
@@ -238,7 +240,7 @@ window.ETAL = {
       rayon: 'accessoires',
       public: 'mixte',
       prix: 2500,
-      image: 'img/bob.webp',
+      photos: ['img/bob.webp', 'img/bob-detail.webp'],
       etiquette: { place: 'hg', incl: 2 },
       tailles: [{ t: 'TU', stock: 1 }],
       infos: {
@@ -258,7 +260,7 @@ window.ETAL = {
       public: 'femme',
       prix: 2500,
       lot: { quantite: 3, prix: 6500 },
-      image: 'img/foulard.webp',
+      photos: ['img/foulard.webp', 'img/foulard-detail.webp'],
       etiquette: { place: 'hg', incl: -3 },
       tailles: [{ t: 'TU', stock: 6 }],
       infos: {
@@ -277,7 +279,7 @@ window.ETAL = {
       rayon: 'hauts',
       public: 'mixte',
       prix: 6000,
-      image: 'img/pull-col-rond.webp',
+      photos: ['img/pull-col-rond.webp', 'img/pull-col-rond-detail.webp'],
       etiquette: { place: 'hd', incl: 3 },
       tailles: [{ t: 'L', stock: 1 }],
       infos: {
@@ -298,7 +300,7 @@ window.ETAL = {
       prix: 14500,
       mot: 'dernière\u00a0!',
       nouveau: true,
-      image: 'img/veste-travail.webp',
+      photos: ['img/veste-travail.webp', 'img/veste-travail-detail.webp'],
       etiquette: { place: 'hg', incl: 1.5 },
       tailles: [{ t: 'L', stock: 1 }],
       infos: {

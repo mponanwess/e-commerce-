@@ -89,17 +89,17 @@
 }
 
 @layer base {
-  /* Le site est blanc ; la balise body, elle, est noire : c’est elle qu’on
-     voit tout en bas, sous le pied de page et quand on tire la page vers le
-     haut. Un pan blanc posé au-dessus du haut de la page garde le haut blanc
-     quand on la tire vers le bas. */
-  html,
-  body {
+  /* Le site est blanc. Derrière lui, la balise body passe du blanc (en haut)
+     au noir (en bas) : on la voit aux bords, quand on tire la page au-delà de
+     son début ou de sa fin. La page elle-même (html) est noire, comme le pied ;
+     un pan blanc posé au-dessus du haut de la page garde le haut blanc. */
+  html {
     background: var(--color-encre);
   }
 
   body {
     @apply font-sans text-encre antialiased;
+    background: linear-gradient(to bottom, #fff, var(--color-encre));
   }
 
   body::before {
@@ -413,6 +413,19 @@
     bottom: 0;
     z-index: 40;
     height: 0;
+    /* Page courte : l’ancre descend en bas du contenu, la pastille avec. */
+    margin-top: auto;
+  }
+
+  /* Le contenu qui porte la pastille s’empile en colonne pour que son ancre
+     puisse descendre tout en bas ; chaque bloc garde toute la largeur. */
+  main:has(> .pastille-ancre) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  main:has(> .pastille-ancre) > * {
+    width: 100%;
   }
 
   .pastille {
@@ -713,12 +726,37 @@
     margin-inline: auto;
 
     @variant lg {
-      max-width: clamp(260px, calc(100dvh - 500px), 560px);
+      max-width: clamp(200px, calc(100dvh - 450px), 560px);
     }
   }
 
   .fiche-image .article {
     filter: drop-shadow(0 10px 9px rgb(0 0 0 / 0.3));
+  }
+
+  /* Une photo de détail est cadrée serrée, sur son fond : ni ombre ni marge. */
+  .fiche-image .article.est-detail {
+    object-fit: cover;
+    filter: none;
+  }
+
+  /* Les points du carrousel : un par photo, plein pour celle qu’on voit.
+     De simples repères : on fait défiler avec les chevrons ou le doigt. */
+  .points {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .points span {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--color-trait);
+  }
+
+  .points .est-vue {
+    background: var(--color-encre);
   }
 
   .bouton-infos {
@@ -959,7 +997,8 @@
     display: none;
   }
 
-  /* Un choix sur la page claire (rayons trouvés) : pilule à contour, pleine une fois choisie. */
+  /* Un choix sur la page claire (rayons trouvés, Tout / Femme / Homme) :
+     pilule à contour, pleine une fois choisie. */
   .puce-claire {
     display: inline-flex;
     height: 44px;
@@ -993,38 +1032,6 @@
     color: rgb(255 255 255 / 0.7);
   }
 
-  /* Tout / Femme / Homme : un choix dans une pilule claire. */
-  .segment {
-    display: inline-flex;
-    gap: 2px;
-    padding: 4px;
-    border-radius: 999px;
-    background: var(--color-fond-doux);
-  }
-
-  .segment button {
-    height: 40px;
-    padding-inline: 18px;
-    border-radius: 999px;
-    color: var(--color-encre-douce);
-    font-size: 15px;
-    font-weight: 600;
-
-    @variant lg {
-      height: 44px;
-      padding-inline: 20px;
-    }
-  }
-
-  .segment button:hover {
-    color: var(--color-encre);
-  }
-
-  .segment button[aria-pressed="true"] {
-    background: var(--color-encre);
-    color: #fff;
-  }
-
   /* Les rayons, en onglets, sur une ligne qui défile sur mobile. */
   .onglets {
     display: flex;
@@ -1055,7 +1062,7 @@
 
   .bouton-filtres {
     display: inline-flex;
-    height: 48px;
+    height: 44px;
     align-items: center;
     gap: 10px;
     padding-inline: 20px;
