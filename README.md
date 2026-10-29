@@ -49,6 +49,10 @@ hors du cercle des partenaires.
   sur yeezy.com.
 - Le foulard montre l’offre « 3 pour 6 500 FCFA » ; la commande 0427 d’Aïcha
   s’affiche tant qu’aucune commande n’a été passée.
+- Les passages d’une page à l’autre s’animent comme sur yeezy.com : la photo
+  glisse de sa case à la fiche, et revient au retour. Montre-les dans Chrome,
+  Edge ou Safari (iPhone, version 18.2 et plus) : Firefox change de page sans
+  animation.
 
 ## Mettre en ligne sur GitHub Pages
 

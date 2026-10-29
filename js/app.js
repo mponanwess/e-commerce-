@@ -341,6 +341,45 @@
   document.getElementById('pastille')?.insertAdjacentHTML('beforeend', pastille);
   document.getElementById('pied')?.insertAdjacentHTML('beforeend', pied);
 
+  /* Le passage animé d’une page à l’autre (voir @view-transition dans le CSS) :
+     la photo de la pièce et celle de sa case portent le même nom, « piece » ;
+     le navigateur fait glisser l’une vers l’autre. La fiche nomme sa photo
+     dans le CSS ; sur l’étal, il faut trouver la case liée à la pièce, qu’on
+     y aille ou qu’on en revienne. */
+  const cible = (url) => {
+    const u = new URL(url, location.href);
+    return { slug: u.searchParams.get('p') ?? u.searchParams.get('modele'), couleur: u.searchParams.get('c') };
+  };
+  // La photo de la case qui mène à cette pièce (ce coloris de préférence), si elle est à l’écran.
+  const photoLiee = (url) => {
+    const { slug, couleur } = cible(url);
+    if (!slug) return null;
+    const cases = [...document.querySelectorAll('a.case')].filter((a) => cible(a.href).slug === slug);
+    const img = (cases.find((a) => couleur && cible(a.href).couleur === couleur) ?? cases[0])?.querySelector('img');
+    const r = img?.getBoundingClientRect();
+    return r && r.bottom > 0 && r.top < innerHeight ? img : null;
+  };
+  const nommer = (img) => {
+    document.querySelectorAll('a.case img').forEach((i) => (i.style.viewTransitionName = ''));
+    if (img) img.style.viewTransitionName = 'piece';
+  };
+  // Des deux adresses, celle qui désigne une pièce : l’autre page, sinon celle-ci (les coloris).
+  const adressePiece = (autre) => (autre && cible(autre).slug ? autre : location.href);
+  // Au départ. Le clic suffit aux navigateurs qui ne disent pas où l’on va.
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a.case');
+    if (a) nommer(a.querySelector('img'));
+  });
+  window.addEventListener('pageswap', (e) => {
+    if (e.viewTransition && e.activation) nommer(photoLiee(adressePiece(e.activation.entry.url)));
+  });
+  // À l’arrivée.
+  window.addEventListener('pagereveal', (e) => {
+    if (!e.viewTransition) return;
+    document.documentElement.classList.add('vt-arrivee');
+    nommer(photoLiee(adressePiece(window.navigation?.activation?.from?.url ?? document.referrer)));
+  });
+
   // Un chevron de retour revient à la page d’avant quand elle est de ce site
   // (les coloris, un rayon), sinon il suit son lien.
   document.addEventListener('click', (e) => {

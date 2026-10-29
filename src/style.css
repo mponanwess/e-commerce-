@@ -735,6 +735,7 @@
 
   .fiche-image .article {
     filter: drop-shadow(0 10px 9px rgb(0 0 0 / 0.3));
+    view-transition-name: piece;
   }
 
   /* Une photo de détail est cadrée serrée, sur son fond : ni ombre ni marge. */
@@ -1134,4 +1135,41 @@
   .bouton-contour:hover {
     border-color: var(--color-encre);
   }
+}
+
+/* Le passage d’une page à l’autre, comme sur yeezy.com : la photo de la pièce
+   glisse de sa case à la fiche (son nom « piece » est posé par js/app.js sur
+   la bonne case), le reste s’efface, la pastille ne bouge pas. Les
+   navigateurs qui ne savent pas le faire changent de page sans animation. */
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
+::view-transition-group(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 0.3s;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+.pastille {
+  view-transition-name: pastille;
+}
+
+/* Sur la fiche, nom, prix, tailles et « + » remontent juste après la photo. */
+@keyframes monter {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+.vt-arrivee .fiche-details {
+  animation: monter 0.3s 0.2s cubic-bezier(0.2, 0, 0, 1) both;
 }

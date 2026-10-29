@@ -9,7 +9,9 @@
   <title>Nom de la boutique</title>
   <link rel="icon" href="data:,">
   <link rel="preload" href="fonts/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=4d470d21">
+  <!-- Une page ne s’affiche que remplie : le passage animé d’une page à l’autre la photographie au premier affichage. -->
+  <link rel="expect" href="#rendu" blocking="render">
+  <link rel="stylesheet" href="css/style.css?v=4a35c5d7">
 </head>
 <body class="flex min-h-dvh flex-col" data-page="etal" x-data="etal" :class="vue === 'pastel' && 'vue-pastel'">
   <header class="site bords-surs">
@@ -138,7 +140,9 @@
   <footer class="pied" id="pied"></footer>
 
   <script src="js/data.js?v=071d8ded"></script>
-  <script src="js/app.js?v=af4b28e5"></script>
-  <script src="vendor/alpine.min.js?v=b4036e9e" defer></script>
+  <script src="js/app.js?v=b120c49d"></script>
+  <script src="vendor/alpine.min.js?v=b4036e9e"></script>
+  <!-- Le premier affichage attend ce repère : Alpine a déjà rempli la page. -->
+  <div id="rendu" hidden></div>
 </body>
 </html>

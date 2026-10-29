@@ -8,7 +8,9 @@
   <title>Nom de la boutique</title>
   <link rel="icon" href="data:,">
   <link rel="preload" href="fonts/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=4d470d21">
+  <!-- Une page ne s’affiche que remplie : le passage animé d’une page à l’autre la photographie au premier affichage. -->
+  <link rel="expect" href="#rendu" blocking="render">
+  <link rel="stylesheet" href="css/style.css?v=4a35c5d7">
 </head>
 <body class="flex min-h-dvh flex-col" x-data="fiche">
   <header class="site bords-surs">
@@ -62,42 +64,45 @@
           </button>
         </div>
 
-        <div class="points mt-4" aria-hidden="true" x-show="piece.photos.length > 1">
-          <template x-for="(_, i) in piece.photos" :key="i">
-            <span :class="i === photo && 'est-vue'"></span>
-          </template>
-        </div>
-
-        <h1 class="nom-produit mt-3 px-4 text-center" x-text="piece.nom"></h1>
-
-        <p class="etiquette etiquette--libre mt-3 text-[28px]" style="--incl: -2deg">
-          <span class="etiquette-papier">
-            <s class="etiquette-avant" x-show="piece.avant" x-text="piece.avant && $fcfa(piece.avant)"></s><span x-text="prix(piece)"></span>
-            <span class="etiquette-mot" x-show="piece.mot" x-text="piece.mot"></span>
-          </span>
-        </p>
-
-        <nav class="mt-6" aria-label="Coloris" x-show="piece.coloris">
-          <ul class="flex flex-wrap justify-center gap-2">
-            <template x-for="v in base.variantes ?? []" :key="v.couleur">
-              <li><a class="taille" :href="lien(v)" :aria-current="v.couleur === piece.coloris?.couleur ? 'true' : null" x-text="v.nom"></a></li>
+        <!-- Nom, prix, tailles et « + » : ils arrivent juste après la photo. -->
+        <div class="fiche-details flex w-full flex-col items-center">
+          <div class="points mt-4" aria-hidden="true" x-show="piece.photos.length > 1">
+            <template x-for="(_, i) in piece.photos" :key="i">
+              <span :class="i === photo && 'est-vue'"></span>
             </template>
-          </ul>
-        </nav>
+          </div>
 
-        <div class="mt-4 flex flex-wrap justify-center gap-2" role="group" :aria-label="piece.rayon === 'chaussures' ? 'Pointure' : 'Taille'">
-          <template x-for="t in piece.tailles" :key="t.t">
-            <button type="button" class="taille" :aria-pressed="String(taille === t.t)" :aria-disabled="String(!t.stock)" @click="choisir(t)">
-              <span x-text="t.t"></span><template x-if="!t.stock"><span class="sr-only">, épuisée</span></template>
-            </button>
-          </template>
+          <h1 class="nom-produit mt-3 px-4 text-center" x-text="piece.nom"></h1>
+
+          <p class="etiquette etiquette--libre mt-3 text-[28px]" style="--incl: -2deg">
+            <span class="etiquette-papier">
+              <s class="etiquette-avant" x-show="piece.avant" x-text="piece.avant && $fcfa(piece.avant)"></s><span x-text="prix(piece)"></span>
+              <span class="etiquette-mot" x-show="piece.mot" x-text="piece.mot"></span>
+            </span>
+          </p>
+
+          <nav class="mt-6" aria-label="Coloris" x-show="piece.coloris">
+            <ul class="flex flex-wrap justify-center gap-2">
+              <template x-for="v in base.variantes ?? []" :key="v.couleur">
+                <li><a class="taille" :href="lien(v)" :aria-current="v.couleur === piece.coloris?.couleur ? 'true' : null" x-text="v.nom"></a></li>
+              </template>
+            </ul>
+          </nav>
+
+          <div class="mt-4 flex flex-wrap justify-center gap-2" role="group" :aria-label="piece.rayon === 'chaussures' ? 'Pointure' : 'Taille'">
+            <template x-for="t in piece.tailles" :key="t.t">
+              <button type="button" class="taille" :aria-pressed="String(taille === t.t)" :aria-disabled="String(!t.stock)" @click="choisir(t)">
+                <span x-text="t.t"></span><template x-if="!t.stock"><span class="sr-only">, épuisée</span></template>
+              </button>
+            </template>
+          </div>
+
+          <button type="button" class="bouton-plus mt-4" :aria-label="ajoutee ? 'Ajouté au panier' : 'Ajouter au panier'" @click="ajouter()">
+            <svg class="trait" viewBox="0 0 24 24" aria-hidden="true" x-show="!ajoutee"><path d="M12 4v16M4 12h16"/></svg>
+            <svg class="trait" viewBox="0 0 24 24" aria-hidden="true" x-show="ajoutee" x-cloak><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+          </button>
+          <p class="mot mt-1 min-h-[1.5em]" :class="ton === 'succes' ? 'text-succes' : 'text-alerte'" role="status" x-text="message"></p>
         </div>
-
-        <button type="button" class="bouton-plus mt-4" :aria-label="ajoutee ? 'Ajouté au panier' : 'Ajouter au panier'" @click="ajouter()">
-          <svg class="trait" viewBox="0 0 24 24" aria-hidden="true" x-show="!ajoutee"><path d="M12 4v16M4 12h16"/></svg>
-          <svg class="trait" viewBox="0 0 24 24" aria-hidden="true" x-show="ajoutee" x-cloak><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
-        </button>
-        <p class="mot mt-1 min-h-[1.5em]" :class="ton === 'succes' ? 'text-succes' : 'text-alerte'" role="status" x-text="message"></p>
       </article>
     </template>
 
@@ -107,7 +112,9 @@
   <footer class="pied" id="pied"></footer>
 
   <script src="js/data.js?v=071d8ded"></script>
-  <script src="js/app.js?v=af4b28e5"></script>
-  <script src="vendor/alpine.min.js?v=b4036e9e" defer></script>
+  <script src="js/app.js?v=b120c49d"></script>
+  <script src="vendor/alpine.min.js?v=b4036e9e"></script>
+  <!-- Le premier affichage attend ce repère : Alpine a déjà rempli la page. -->
+  <div id="rendu" hidden></div>
 </body>
 </html>
